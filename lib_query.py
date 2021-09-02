@@ -34,7 +34,6 @@ def create_table(conn, create_table_sql):
         print(e)
 
 
-
 def select_all_from_single_table(conn, table):
     """
     Query all rows in the tasks table
@@ -57,32 +56,58 @@ def inserisci(conn, istruzione_d_inserimento):
     except Error as e:
         print(e)
 
-"""
-1.	Inserimento di una nuova fiera						                (Admin)
-2.	Inserimento di un nuovo torneo                      				(Admin)
-3.	Lista partite effettuale in un torneo per uno specifico torneo		(User)	
-4.	Gioco con più tornei basati su di esso 					            (User)
-5.	Gioco da tavolo con più partite non ufficiali    				    (Admin)
-6.	Top 10 giocatori con il punteggio più alto 					        (User)
-7.	I due giochi più venduti 							                (User)
-8.	Inserimento di un nuovo dipendente 					                (Admin)
-9.	Lista vendite per uno stand 							            (Admin)
-10.	Lista dell’attuale formato 							                (User)
-11.	Aggiornamento di un formato 						                (Admin)
 
 
+######################################## FUNZIONI ADMIN ####################################################
 
-    istruzione_inserimento1 = INSERT INTO projects(name,begin_date,end_date) VALUES ('proggeto1','2001-01-01','2002-02-02')
-
-"""
-
-def inserimento_nuova_fiera(conn):
+def inserimento_nuova_fiera(conn, <parametri>):
     print()
-    istruzione = """ INSERT INTO Fiera(...) VALUES (...variabili da input...)"""
+    sql = """ INSERT INTO Fiera(...) VALUES (...variabili da input...)"""
 
-def inserimento_nuovo_torneo(conn):
+def inserimento_nuovo_torneo(conn, <parametri>):
     print()
-    istruzione = """ INSERT INTO Fiera(...) VALUES (...variabili da input...)"""
+    sql = """ INSERT INTO Fiera(...) VALUES (...variabili da input...)"""
+
+
+def gioco_con_maggior_partite_unofficial(conn):
+    sql = """ SELECT <parametri>, MAX(numeroPartite) AS NumeroPartiteNonUfficiali FROM Gioco non ufficiale Gnu, Gioco da tavolo Gdt WHERE Gnu.codGioco = Gdt.codGioco """
+
+
+def aggiornamento_dipendenti(conn, <parametri>):
+    if(True):
+        sql = """ UPDATE """
+    else:
+        sql = """ INSERT INTO """
+
+
+def lista_vendite_stand(conn, stand):
+    sql = """ SELECT * FROM Vendite WHERE codStand=%s """ % stand
+
+
+def aggiornamento_formato(conn, formato, <parametri>):
+    sql = """ UPDATE Formato SET <parametri> WHERE IdFormato=%s """ % formato
+
+
+
+
+
+######################################## FUNZIONI UTENTE ####################################################
 
 def lista_partite_effettuate_torneo(conn, torneo):
-    istruzione=""" SELECT <parametri> FROM Torneo WHERE CodTorneo=%s""" % torneo
+    sql = """ SELECT <parametri> FROM Torneo WHERE CodTorneo=%s""" % torneo
+
+
+def gioco_con_maggior_tornei(conn, gioco):
+    sql = """ SELECT <parametri>, COUNT(*) AS NumeroTornei FROM Torneo T, Gioco da tavolo G WHERE nomeGioco=%s GROUP BY nomeGioco """ % gioco
+
+
+def top_dieci_giocatori(conn):
+    sql = """ SELECT TOP(10) <parametri> FROM GiocatoreWHERE MAX(punteggio) """
+
+
+def giochi_più_venduti():
+    sql = """ SELECT TOP(2) <parametri> FROM Vendita WHERE """
+
+
+def formato_attuale(conn, data):
+    sql = """ SELECT <parametri> FROM Formato WHERE periodo comprende %s """ % data
