@@ -1,8 +1,10 @@
 
 import tkinter as tk
+from tkinter import ttk
+import tkinter.font as tkfont
 from tkinter import PhotoImage
 from tkinter import messagebox
-import lib_query as sql
+
 
 window_main = tk.Tk()
 window_main.title("ChallengeUP Games")
@@ -35,15 +37,15 @@ def calcolo_dimensioni_finestra(frame):
 
 def program_start(tipologia_utente):
         
-        if(tipologia_utente=="user"):
-            window_main.geometry(calcolo_dimensioni_finestra("GUI principale"))
-            print("accesso utente")
-            top_welcome_frame.pack_forget()
-            top_frame.pack()
-            middle_frame.pack()
-        else:
-            print("acceso admin")
-            #controllo sulle credenziali
+    if(tipologia_utente=="user"):
+        window_main.geometry(calcolo_dimensioni_finestra("GUI principale"))
+        print("accesso utente")
+        top_welcome_frame.pack_forget()
+        top_frame.pack()
+        middle_frame.pack()
+    else:
+        print("acceso admin")
+        #controllo sulle credenziali
 
 
 
@@ -71,31 +73,20 @@ first_frame.pack(side=tk.TOP)
 admin_login_frame = tk.Frame(top_welcome_frame)
 
 lbl_name = tk.Label(admin_login_frame, text = "Name:").grid(row=0, column=0)
-
 ent_name = tk.Entry(admin_login_frame).grid(row=0, column=1)
-
 lbl_password = tk.Label(admin_login_frame, text = "Password:").grid(row=1, column=0)
-
 ent_password = tk.Entry(admin_login_frame).grid(row=1, column=1)
-
 btn_Log = tk.Button(admin_login_frame, text="Log-in", command=lambda : program_start("admin")).grid(row=2, column=0)
-
 
 admin_login_frame.pack(side=tk.TOP)
 admin_login_frame.pack_forget()
 #####################################
 
 
-
 top_welcome_frame.pack(side=tk.TOP)
-
-
-
 ##################################### FINESTRA PRINCIPALE ####################################################
 
-
 top_frame = tk.Frame(window_main)
-
 #####################################
 top_left_frame = tk.Frame(top_frame, highlightbackground="green", highlightcolor="green", highlightthickness=1)
 
@@ -116,9 +107,10 @@ lbl_game_round.grid(row=0, column=0, padx=5, pady=5)
 lbl_timer.grid(row=1, column=0, padx=5, pady=5)
 
 top_right_frame.pack(side=tk.RIGHT, padx=(10, 10))
-#####################################
 
+#####################################
 top_frame.pack_forget()
+
 
 ##########################################################################
 
