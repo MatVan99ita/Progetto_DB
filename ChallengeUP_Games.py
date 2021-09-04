@@ -24,16 +24,18 @@ def Admin_login(log):
         program_start("user")
     
 
-def calcolo_dimensioni_finestra(frame):
+def calcolo_dimensioni_finestra(frame, larg=0):
     if(frame=="inizio"):
         nuova_altezza=(10*screen_height)/100
         nuova_larghezza=(20*screen_width)/100
     elif("GUI principale"):#finestra principale
         nuova_altezza=(75*screen_height)/100
         nuova_larghezza=(50*screen_width)/100
-    else:#frame tabella
+    elif("frame tabella"):#frame tabella
         nuova_altezza=(75*screen_height)/100
         nuova_larghezza=((50*screen_width)/2)/100
+    elif("tabella"):
+        nuova_larghezza=(50*screen_width)/larg)/100
     geometria="%dx%d" % (nuova_larghezza, nuova_altezza)
 
     return geometria
@@ -71,17 +73,16 @@ def program_start(tipologia_utente):
         #controllo sulle credenziali
 
 
-def genera_tabella_query(self, ris):
+def genera_tabella_query(ris):
     total_rows=len(ris)
     total_columns=len(ris[0])
+    dimensione_colonna=int(total_columns*3)
     for i in range(total_rows):
             for j in range(total_columns):
-                  
-                self.e = Entry(db_frame_user, width=20, fg='blue',
-                               font=('Arial',16,'bold'))
-                  
-                self.e.grid(row=i, column=j)
-                self.e.insert(END, ris[i][j])
+
+                e = Entry(db_frame_user, width=dimensione_colonna,font=('Arial',16,'bold'))
+                e.grid(row=i, column=j)
+                e.insert(END, ris[i][j])
 
 window_main.geometry(calcolo_dimensioni_finestra("inizio"))
 
@@ -128,8 +129,10 @@ top_frame = tk.Frame(window_main)
 #####################################
 top_left_frame = tk.Frame(top_frame, highlightbackground="green", highlightcolor="green", highlightthickness=1)
 
+v=[[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4],[5,5,5,5],[6,6,6,6]]
+print(v)
 
-btn_U1=tk.Button(top_left_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=0, column=0)
+btn_U1=tk.Button(top_left_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_tabella_query(v)).grid(row=0, column=0)
 btn_U2=tk.Button(top_left_frame, text="Top 10 giocatori con il punteggio più alto", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=1, column=0)
 btn_U3=tk.Button(top_left_frame, text="Lista delle carte bandite dall'attuale formato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=2, column=0)
 btn_U4=tk.Button(top_left_frame, text="Lista delle carte di un mazzo specificato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=3, column=0)
