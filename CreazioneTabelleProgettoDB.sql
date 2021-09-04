@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS FIERE(
 );
 
 CREATE TABLE IF NOT EXISTS VENDITE(
-    CodVendita int NOT NULL AUTOINCREMENT,
+    CodVendita int NOT NULL,
     prodotto char(20) NOT NULL,
     quantità int NOT NULL,
     dataVendita DATETIME NOT NULL,
@@ -240,12 +240,14 @@ CREATE TABLE IF NOT EXISTS PEDINE(
 
 CREATE TABLE IF NOT EXISTS MATERIALI_DA_GIOCO(
   codMateriale int NOT NULL,
-  codDado int, codCarta INT, codPedina int,
+  codDado int, 
+  codCarta INT, 
+  codPedina int,
   primary key (codMateriale) --,
 --    CHECK(EXISTS( (SELECT * FROM DADI WHERE codDado IS NOT NULL AND DADI.codDado=codMateriale) OR 
 --               (select * from PEDINE where codPedina IS NOT NULL AND PEDINE.codPedina=codMateriale) OR 
 --               (select * from CARTE where codCarta IS NOT NULL AND CARTE.codCarta=codMateriale))
 ,
-     foreign key (codDado) references DADI,
-     foreign key (codPedina) references PEDINE,
-     foreign key (codCarta) references CARTE);
+    foreign key (codDado) references DADI,
+    foreign key (codPedina) references PEDINE,
+    foreign key (codCarta) references CARTE);

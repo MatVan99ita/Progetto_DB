@@ -15,7 +15,8 @@ sql.append(""" CREATE TABLE IF NOT EXISTS NAZIONI(
 sql.append(""" CREATE TABLE IF NOT EXISTS CITTA(
     IdCittà int PRIMARY KEY,
     nomeCittà char(60) NOT NULL,
-    FOREIGN KEY (IdNazione) references NAZIONI
+    IdNazione INT NOT NULL, 
+  	FOREIGN KEY (IdNazione) REFERENCES NAZIONI
 );""")
 
 ########## Nazione #############
@@ -26,17 +27,20 @@ sql.append(""" CREATE TABLE IF NOT EXISTS FIERE(
     nomeFiera char(20) NOT NULL,
     dataInzioFiera DATETIME NOT NULL,
     dataFineFiera DATETIME NOT NULL,
+    IdNazione int NOT NULL,
+    IdCittà int NOT NULL,
     FOREIGN KEY (IdNazione) references CITTA,
     FOREIGN KEY (IdCittà) references CITTA
 );""")
 
 ########## Vendite #############
 sql.append(""" CREATE TABLE IF NOT EXISTS VENDITE(
-    CodVendita int NOT NULL AUTO_INCRMENT,
+    CodVendita int NOT NULL,
     prodotto char(20) NOT NULL,
     quantità int NOT NULL,
     dataVendita DATETIME NOT NULL,
     prezzoVendita MONEY NOT NULL,
+    IdStand int NOT NULL,
     PRIMARY KEY (CodVendita, prodotto, quantità),
     FOREIGN KEY (IdStand) REFERENCES STANDS
 );""")
@@ -45,6 +49,8 @@ sql.append(""" CREATE TABLE IF NOT EXISTS VENDITE(
 sql.append(""" CREATE TABLE IF NOT EXISTS STANDS(
     codStand int PRIMARY KEY,
     nome char(10) NOT NULL,
+    IdFiera int NOT NULL,
+    CodiceBadge int NOT NULL,
     FOREIGN KEY (IdFiera) REFERENCES FIERE,
     FOREIGN KEY (CodiceBadge) REFERENCES DIPENDENTI
 );""")
@@ -52,17 +58,21 @@ sql.append(""" CREATE TABLE IF NOT EXISTS STANDS(
 ########## Contenuti #############
 sql.append(""" CREATE TABLE IF NOT EXISTS CONTENUTI(
     quantitàGiochi int NOT NULL,
-    codStand INT NOT NULL FOREIGN KEY REFERENCES STAND,
-    codGioco INT NOT NULL FOREIGN KEY REFERENCES GIOCHI_DA_TAVOLO,
-    PRIMARY KEY(codStand, codGioco)
+    codStand INT NOT NULL,
+    codGioco INT NOT NULL,
+    PRIMARY KEY(codStand, codGioco),
+    FOREIGN KEY (codStand) REFERENCES STAND,
+    FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO
 );""")
 
 ########## Immagazzinati #############
 sql.append(""" CREATE TABLE IF NOT EXISTS IMMAGAZZINATI(
     quantitàMateriale int NOT NULL,
-    codStand INT NOT NULL FOREIGN KEY REFERENCES STAND,
-    codMateriale INT NOT NULL FOREIGN KEY REFERENCES MATERIALI_DA_GIOCO,
-    PRIMARY KEY (codStand, codMateriale)
+    codStand INT NOT NULL,
+    codMateriale INT NOT NULL,
+    PRIMARY KEY (codStand, codMateriale),
+    FOREIGN KEY (codStand) REFERENCES STAND,
+    FOREIGN KEY (codMateriale) REFERENCES MATERIALI_DA_GIOCO
 );""")
 
 ########## Giochi da tavolo #############
@@ -78,15 +88,18 @@ sql.append(""" CREATE TABLE IF NOT EXISTS FORMATI(
     dataInizio DATETIME NOT NULL,
     dataFine DATETIME NOT NULL,
     listaCarteBandite varchar(1000) NOT NULL,
-    PRIMARY KEY (dataInzio, dataFine),
+    codGioco int NOT NULL,
+    PRIMARY KEY (dataInizio, dataFine),
     FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO
 );""")
 
 ########## Situati #############
 sql.append(""" CREATE TABLE IF NOT EXISTS SITUATI(
-    codGioco INT NOT NULL FOREIGN KEY REFERENCES GIOCHI_DA_TAVOLO,
-    codTerreno INT NOT NULL FOREIGN KEY REFERENCES TERRENO,
-    PRIMARY KEY (codGioco, codTerreno)
+    codGioco INT NOT NULL,
+    codTerreno INT NOT NULL,
+    PRIMARY KEY (codGioco, codTerreno),
+    FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO,
+    FOREIGN KEY (codTerreno) REFERENCES TERRENO
 );""")
 
 ########## Terreni #############
@@ -101,14 +114,18 @@ sql.append(""" CREATE TABLE IF NOT EXISTS TORNEI(
     dataTorneo DATETIME NOT NULL,
     nomeTorneo char(20) NOT NULL,
     numeroSpettatori int NOT NULL,
-    numeroPartecipanti int NOT NULL CHECK(numeroPartecipanti >= 2)
+    numeroPartecipanti int NOT NULL CHECK(numeroPartecipanti >= 2),
+    codGioco int NOT NULL,
+    IdFiera int NOT NULL,
     FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO,
-    FOREIGN KEY (IdFiera) REFERENCES FIERA,
+    FOREIGN KEY (IdFiera) REFERENCES FIERA
 );""")
 
 ########## Sorvegliano #############
 sql.append(""" CREATE TABLE IF NOT EXISTS SORVEGLIANO(
     turnoDiLavoro DATETIME PRIMARY KEY,
+    IdFiera int NOT NULL,
+    CodiceBadge int NOT NULL,
     FOREIGN KEY (IdFiera) REFERENCES FIERA,
     FOREIGN KEY (CodiceBadge) REFERENCES DIEPENDENTI
 );""")
@@ -128,6 +145,8 @@ sql.append(""" CREATE TABLE IF NOT EXISTS PARTECIPANTI(
     nome char(30) NOT NULL,
     cognome char(30) NOT NULL,
     dataDiNascita DATETIME NOT NULL,
+    IdFiera int NOT NULL,
+    CodiceBadge int NOT NULL,
     FOREIGN KEY (IdFiera) REFERENCES FIERA,
     FOREIGN KEY (CodiceBadge) REFERENCES DIPENDENTI
 );""")
@@ -139,21 +158,27 @@ sql.append(""" CREATE TABLE IF NOT EXISTS PADIGLIONI(
     nomePadiglione char(20) NOT NULL,
     capienzaMassima int NOT NULL CHECK(capienzaMassima >= 1),
     numeroTavoli int NOT NULL CHECK(numeroTavoli >=1),
+    IdFiera int NOT NULL,
     FOREIGN KEY (IdFiera) REFERENCES FIERA
 );""")
 
 ########## Partite non ufficiali #############
 sql.append(""" CREATE TABLE IF NOT EXISTS PARTITE_NON_UFFICIALI(
     numeroPartite int NOT NULL,
-    codGioco INT NOT NULL FOREIGN KEY REFERENCES GIOCHI_DA_TAVOLO,
-    codPadiglione INT NOT NULL FOREIGN KEY REFERENCES PADIGLIONI,
-    PRIMARY KEY (codGioco, codPadiglione)
+    codGioco INT NOT NULL,
+    codPadiglione INT NOT NULL,
+    PRIMARY KEY (codGioco, codPadiglione),
+    FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO,
+    FOREIGN KEY (codPadiglione) REFERENCES PADIGLIONI
 );""")
 
 ########## Partite ufficiali #############
 sql.append(""" CREATE TABLE IF NOT EXISTS PARTITE_UFFICIALI(
     IdMatch int PRIMARY KEY,
     dataPartita DATETIME NOT NULL,
+    IdGiudice int NOT NULL,
+    codPadiglione int NOT NULL,
+    IdTorneo int NOT NULL,
     FOREIGN KEY (IdGiudice) REFERENCES DIPENDENTI,
     FOREIGN KEY (CodPadiglione) REFERENCES PADIGLIONI,
     FOREIGN KEY (IdTorneo) REFERENCES TORNEI
@@ -161,16 +186,20 @@ sql.append(""" CREATE TABLE IF NOT EXISTS PARTITE_UFFICIALI(
 
 ########## Vincitori #############
 sql.append(""" CREATE TABLE IF NOT EXISTS VINCITORI(
-    IdMatch INT NOT NULL FOREIGN KEY REFERENCES PARTITE_UFFICIALI,
-    codConcorrente INT NOT NULL FOREIGN KEY REFERENCES CONCORRENTI,
-    PRIMARY KEY (numeroMatch, codConcorrente)
+    IdMatch INT NOT NULL,
+    codConcorrente INT NOT NULL,
+    PRIMARY KEY (IdMatch, codConcorrente),
+    FOREIGN KEY (IdMatch) REFERENCES PARTITE_UFFICIALI,
+    FOREIGN KEY (codConcorrente) REFERENCES CONCORRENTI
 );""")
 
 ########## Perdenti #############
 sql.append(""" CREATE TABLE IF NOT EXISTS PERDENTI(
-    IdMatch INT NOT NULL FOREIGN KEY REFERENCES PARTITE_UFFICIALI,
-    codConcorrente INT NOT NULL FOREIGN KEY REFERENCES CONCORRENTI,
-    PRIMARY KEY (numeroMatch, codConcorrente)
+    IdMatch INT NOT NULL,
+    codConcorrente INT NOT NULL,
+    PRIMARY KEY (IdMatch, codConcorrente),
+    FOREIGN KEY (IdMatch) REFERENCES PARTITE_UFFICIALI,
+    FOREIGN KEY (codConcorrente) REFERENCES CONCORRENTI
 );""")
 
 ########## Concorrenti #############
@@ -181,38 +210,46 @@ sql.append(""" CREATE TABLE IF NOT EXISTS CONCORRENTI(
 
 ########## Possiedono #############
 sql.append(""" CREATE TABLE IF NOT EXISTS POSSIEDONO(
-    codGioco INT NOT NULL FOREIGN KEY REFERENCES GIOCHI_DA_TAVOLO,
-    codCarta INT NOT NULL FOREIGN KEY REFERENCES CARTE,
-    PRIMARY KEY (codGioco, codCarta)
+    codGioco INT NOT NULL,
+    codCarta INT NOT NULL,
+    PRIMARY KEY (codGioco, codCarta),
+    FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO,
+    FOREIGN KEY (codCarta) REFERENCES CARTE
 );""")
 
 ########## Composti #############
 sql.append(""" CREATE TABLE IF NOT EXISTS COMPOSTI(
-    codMazzo INT NOT NULL FOREIGN KEY REFERENCES MAZZI,
-    codCarta INT NOT NULL FOREIGN KEY REFERENCES CARTE,
-    PRIMARY KEY (codGioco, codCarta)
+    codMazzo INT NOT NULL,
+    codCarta INT NOT NULL,
+    PRIMARY KEY (codMazzo, codCarta),
+    FOREIGN KEY (codMazzo) REFERENCES MAZZI,
+    FOREIGN KEY (codCarta) REFERENCES CARTE
 );""")
 
-########## Set carte bandite #############
+########## Set di carte bandite #############
 sql.append(""" CREATE TABLE IF NOT EXISTS SET_CARTE_BANDITE(
-    dataInizio INT NOT NULL FOREIGN KEY REFERENCES FORMATI,
-    dataFine INT NOT NULL FOREIGN KEY REFERENCES FORMATI,
-    codCarta INT NOT NULL FOREIGN KEY REFERENCES CARTE,
+    dataInizio INT NOT NULL,
+    dataFine INT NOT NULL,
+    codCarta INT NOT NULL,
     PRIMARY KEY (dataInizio, dataFine, codCarta)
+    FOREIGN KEY (dataInizio) REFERENCES FORMATI,
+    FOREIGN KEY (dataFine) REFERENCES FORMATI,
+    FOREIGN KEY (codCarta) REFERENCES CARTE
 );""")
 
 ########## Carte #############
 sql.append(""" CREATE TABLE IF NOT EXISTS CARTE(
     codCarta int PRIMARY KEY,
     nome char(50) NOT NULL,
-    tipo char(10) NOT NULL CHECH(tipo = 'Mostro' OR 'Magia' OR 'Trappola'),
+    tipo char(10) NOT NULL CHECK(tipo = 'Mostro' OR tipo='Magia' OR tipo='Trappola'),
     descrizione char(100),
     costoMana int,
     attributo char(10),
     attacco int,
     difesa int,
     effetto char(20) NOT NULL
-);""")
+);
+""")
 
 ########## Mazzi #############
 sql.append(""" CREATE TABLE IF NOT EXISTS MAZZI(
@@ -239,15 +276,141 @@ sql.append(""" CREATE TABLE IF NOT EXISTS PEDINE(
 ########## Materiali da gioco #############
 sql.append(""" CREATE TABLE IF NOT EXISTS MATERIALI_DA_GIOCO(
   codMateriale int NOT NULL,
-  codDado int, codCarta INT, codPedina int,
+  codDado int, 
+  codCarta INT, 
+  codPedina int,
   primary key (codMateriale) --,
 --    CHECK(EXISTS( (SELECT * FROM DADI WHERE codDado IS NOT NULL AND DADI.codDado=codMateriale) OR 
 --               (select * from PEDINE where codPedina IS NOT NULL AND PEDINE.codPedina=codMateriale) OR 
 --               (select * from CARTE where codCarta IS NOT NULL AND CARTE.codCarta=codMateriale))
 ,
-     foreign key (codDado) references DADI,
-     foreign key (codPedina) references PEDINE,
-     foreign key (codCarta) references CARTE);""")
+    foreign key (codDado) references DADI,
+    foreign key (codPedina) references PEDINE,
+    foreign key (codCarta) references CARTE
+);""")
+
+##########################################################################################################
+
+####################################### INSERIMENTO RECORD ################################################
+
+sql.append(""" INSERT INTO NAZIONI(nomeNazione) 
+VALUES(?),(?)
+;""")
+
+sql.append(""" INSERT INTO CITTA(nomeCittà, IdNazione) 
+VALUES(?, ?)
+;""")
+
+sql.append(""" INSERT INTO FIERE(via, numeroCivico, nomeFiera, dataInzioFiera, dataFineFiera, IdNazione, IdCittà) 
+VALUES(?, ?, ?, ?, ?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO VENDITE(CodVendita, prodotto, quantità, dataVendita, prezzoVendita, IdStand)
+VALUES(?, ?, ?, ?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO STANDS(nome, IdFiera, CodiceBadge) 
+VALUES(?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO CONTENUTI(quantitàGiochi, codStand, codGioco)
+VALUES(?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO IMMAGAZZINATI(quantitàMateriale, codStand, codMateriale)
+VALUES(?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO GIOCHI_DA_TAVOLO(nomeGioco, descrizione, regolamento)
+VALUES(?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO FORMATI(dataInizio, dataFine, listaCarteBandite, codGioco)
+VALUES(?, ?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO SITUATI(codGioco, codTerreno)
+VALUES(?, ?)
+;""")
+
+sql.append(""" INSERT INTO TERRENI(codTerreno, descrizione)
+VALUES(?, ?)
+;""")
+
+sql.append(""" INSERT INTO TORNEI(dataTorneo, nomeTorneo, numeroSpettatori, numeroPartecipanti, codGioco, IdFiera)
+VALUES(?, ?, ?, ?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO SORVEGLIANO(turnoDiLavoro, IdFiera, CodiceBadge)
+VALUES(?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO DIPENDENTI(nome, cognome, dataDiNascita, ruolo)
+VALUES(?, ?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO PARTECIPANTI(nome, cognome, dataDiNascita, IdFiera, CodiceBadge)
+VALUES(?, ?, ?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO PADIGLIIONI(tipologia, nomePadiglione, capienzaMassima, numeroTavoli, IdFiera)
+VALUES(?, ?, ?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO PARTITE_NON_UFFICIALI(numeroPartite, codGioco, codPadiglione)
+VALUES(?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO PARTITE_UFFICIALI(dataPartita, IdGiudice, codPadiglione, IdTorneo)
+VALUES(?, ?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO VINCITORI(IdMatch, codConcorrente)
+VALUES(?, ?)
+;""")
+
+sql.append(""" INSERT INTO PERDENTI(IdMatch, codConcorrente)
+VALUES(?, ?)
+;""")
+
+sql.append(""" INSERT INTO CONCORRENTI(punteggio)
+VALUES(?)
+;""")
+
+sql.append(""" INSERT INTO POSSIEDONO(codGioco, codCarta)
+VALUES(?, ?)
+;""")
+
+sql.append(""" INSERT INTO COMPOSTI(codMazzo, codCarta)
+VALUES(?, ?)
+;""")
+
+sql.append(""" INSERT INTO SET_CARTE_BANDITE(dataInizio, dataFine, codCarta)
+VALUES(?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO CARTE(nome, tipo, descrizione, costoMana, attributo, attacco, difesa, effetto)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+;
+""")
+
+sql.append(""" INSERT INTO MAZZI(colore_clan, dimensioni)
+VALUES(?, ?)
+;""")
+
+sql.append(""" INSERT INTO DADI(numFacce, colore, materiale)
+VALUES(?, ?, ?)
+;""")
+
+sql.append(""" INSERT INTO PEDINE(colore, materiale)
+VALUES(?, ?)
+;""")
+
+sql.append(""" INSERT INTO MATERIALI_DA_GIOCO(codMateriale, codDado, codCarta, codPedina)
+VALUES(?, ?, ?, ?)
+;""")
+
+##########################################################################################################
 
 
 for k in sql:
