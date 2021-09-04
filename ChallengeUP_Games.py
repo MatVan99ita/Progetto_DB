@@ -4,13 +4,16 @@ import tkinter.font as tkfont
 from tkinter import *
 from tkinter import ttk
 
-
 window_main = tk.Tk()
 window_main.title("ChallengeUP Games")
 admin_log=False
+screen_width = window_main.winfo_screenwidth()
+screen_height = window_main.winfo_screenheight()
 
 password_entry=tk.StringVar()
 name_entry=tk.StringVar()
+
+nomeFrame=Frame()
 
 def Admin_login(log):
     if(log):
@@ -23,36 +26,39 @@ def Admin_login(log):
     
 
 def calcolo_dimensioni_finestra(frame):
-    screen_width = window_main.winfo_screenwidth()
-    screen_height = window_main.winfo_screenheight()
-
     if(frame=="inizio"):
         nuova_altezza=(10*screen_height)/100
         nuova_larghezza=(20*screen_width)/100
-    else:#finestra principale
+    elif("GUI principale"):#finestra principale
         nuova_altezza=(75*screen_height)/100
         nuova_larghezza=(50*screen_width)/100
+    else:#frame tabella
+        nuova_altezza=(75*screen_height)/100
+        nuova_larghezza=((50*screen_width)/2)/100
     geometria="%dx%d" % (nuova_larghezza, nuova_altezza)
 
     return geometria
 
 
+
+
 def program_start(tipologia_utente):
         
     if(tipologia_utente=="user"):
-        window_main.geometry(calcolo_dimensioni_finestra("GUI principale"))
-        print("accesso utente")
-        top_frame.pack(side=tk.TOP).grid(column=0)
+        nomeFrame=top_frame
         top_welcome_frame.pack_forget()
-    else:
+        window_main.geometry(calcolo_dimensioni_finestra("GUI principale"))
+        top_frame.pack(side=tk.TOP)
+        print("accesso utente")
+    elif(tipologia_utente=="admin"):
         print("acceso admin")
-        print(name_entry.get() + " " + password_entry.get())
+        nomeFrame=admin_frame
+        top_welcome_frame.pack_forget()
     
         window_main.geometry(calcolo_dimensioni_finestra("GUI principale"))
         
-        top_welcome_frame.pack_forget()
         #if(nome=='mat' and passw=='123'):
-        admin_frame.pack(side=tk.TOP).grid(column=0)
+        admin_frame.pack(side=tk.TOP)
         #else:
         #    print("errore user e/o password")
         #controllo sulle credenziali
@@ -64,7 +70,7 @@ def genera_tabella_query(self, ris):
     for i in range(total_rows):
             for j in range(total_columns):
                   
-                self.e = Entry(top_right_frame, width=20, fg='blue',
+                self.e = Entry(db_frame_user, width=20, fg='blue',
                                font=('Arial',16,'bold'))
                   
                 self.e.grid(row=i, column=j)
@@ -153,13 +159,12 @@ lbl_line = tk.Label(admin_frame, text="*****************************************
 
 #####################################
 final_frame = tk.Frame(admin_frame)
-
 btn_U1_admin=tk.Button(final_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=0, column=0)
 btn_U2_admin=tk.Button(final_frame, text="Top 10 giocatori con il punteggio più alto", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=1, column=0)
 btn_U3_admin=tk.Button(final_frame, text="Lista delle carte bandite dall'attuale formato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=2, column=0)
 btn_U4_admin=tk.Button(final_frame, text="Lista delle carte di un mazzo specificato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=3, column=0)
 
-btn_A1=tk.Button(final_frame, text="Inserimento nuova fiera", highlightbackground="green", highlightcolor="green", highlightthickness=1).pack(side=tk.LEFT).grid(row=5, column=0)
+btn_A1=tk.Button(final_frame, text="Inserimento nuova fiera", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=5, column=0)
 btn_A2=tk.Button(final_frame, text="Inserimento nuovo torneo", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=6, column=0)
 btn_A3=tk.Button(final_frame, text="Inserimento dipendente", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=7, column=0)
 btn_A4=tk.Button(final_frame, text="Inserimento nuovo formato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=8, column=0)
@@ -167,23 +172,29 @@ btn_A5=tk.Button(final_frame, text="Gioco da tavolo con più partite non ufficia
 btn_A6=tk.Button(final_frame, text="Il gioco più venduto per ogni stand", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=10, column=0)
 btn_A7=tk.Button(final_frame, text="Registrazione vendita per stand", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=11, column=0)
 
+
 final_frame.pack(side=tk.LEFT)
 
-################### DATABASE FRAME USER ##################
-db_frame_user = tk.Frame(admin_frame, highlightbackground="green", highlightcolor="green", highlightthickness=1)
 
-#tabella
-btn_A1=tk.Button(db_frame_user, text="Inserimento nuova fiera", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=5, column=0)
-btn_A2=tk.Button(db_frame_user, text="Inserimento nuovo torneo", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=6, column=0)
-btn_A3=tk.Button(db_frame_user, text="Inserimento dipendente", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=7, column=0)
-
-
-db_frame_user.pack(side=tk.RIGHT)
 
 #####################################
 
 admin_frame.pack_forget()
 
+
+
+
+
+################### DATABASE FRAME ##################
+dimensioni_frame_tabella=calcolo_dimensioni_finestra("GUI principale")
+dimensioni_frame_tabella=dimensioni_frame_tabella.split("x")
+print(dimensioni_frame_tabella)
+
+db_frame_user = tk.Frame(nomeFrame, highlightbackground="green", highlightcolor="green", highlightthickness=1, background='grey', width=dimensioni_frame_tabella[0], height=dimensioni_frame_tabella[1])
+
+#tabella
+
+db_frame_user.pack(side=tk.RIGHT)
 
 
 window_main.mainloop()
