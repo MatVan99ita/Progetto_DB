@@ -3,6 +3,9 @@ import tkinter as tk
 from tkinter import *
 from tkinter import Listbox
 from tkinter import messagebox as msg
+import lib_query
+import sqlite3 as lite
+
 window_main = tk.Tk()
 window_main.title("ChallengeUP Games")
 admin_log=False
@@ -14,7 +17,9 @@ name_entry=tk.StringVar()
 
 dataTorneo=tk.StringVar()
 
-v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+conn=lite.connect("ChallengeUPGames_DB.db")
+cur=conn.cursor()
+
 
 def Admin_login(log):
     if(log):
@@ -97,6 +102,7 @@ def genera_tabella_query(tipo, ris):
                 e.grid(row=i, column=j)
                 e.insert(ris[i][j], ris[i][j])
 
+
 def controlloData(giorno, mese, anno):
     g=len(giorno)
     m=len(mese)
@@ -106,11 +112,36 @@ def controlloData(giorno, mese, anno):
     yy=int(anno)
     if( (gg%2!=0 and gg%2!=1) and (mm%2!=0 and mm%2!=1) and (yy%2!=0 and yy%2!=1) ):
         msg.showerror(title="FORMATTAZIONE DATA ERRATA", message="Non esiste un valore numerico")
+        return 1
     
     if(g>2 and m>2 and y>4):
         msg.showerror(title="FORMATTAZIONE DATA ERRATA", message="Valori con troppi caratteri")
-    else:
-        genera_tabella_query("user", [["giorno", "mese", "anno"], [giorno, mese, anno]])
+        return 1
+
+    return 0
+    
+
+def lista_partite_effettuate_torneo(conn, giorno, mese, anno):
+    if(controlloData(giorno, mese, anno)==0):
+        data=str(anno)+"-"+str(mese)+"-"+str(giorno)
+
+        sql="""SELECT *
+            FROM 	TORNEI T, PARTITE_UFFICIALI PU, DIPENDENTI D, PADIGLIONI P, VINCITORI V, PERDENTI PE, CONCORRENTI C
+            WHERE T.IdTorneo = PU.IdTorneo AND
+            D.CodiceBadge = PU.IdGiudice AND
+            P.CodPadiglione = PU.CodPadiglione AND
+            PU.IdMatch = V.IdMatch AND
+            PU.IdMatch = PE.IdMatch AND
+            PE.codConcorrente = C. codConcorrente AND
+            V.codConcorrente = C. codConcorrente AND
+            T.dataTorneo=%s;""" % data
+
+        cursor=conn.cursor()
+        cursor.execute(sql)
+        records=cursor.fetchall()
+        v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+        genera_tabella_query("user", v)
+
 
 def genera_parametri(azione):
     
@@ -123,8 +154,7 @@ def genera_parametri(azione):
             ent_giorno = tk.Entry(db_param_frame_user, textvariable=giorno_var).grid(row=0, column=1)
             ent_mese = tk.Entry(db_param_frame_user, textvariable=mese_var).grid(row=0, column=2)
             ent_anno = tk.Entry(db_param_frame_user, textvariable=anno_var).grid(row=0, column=3)
-
-            btn_calcoloQuery = tk.Button(db_param_frame_user, text="Controlla", command=lambda : controlloData(giorno_var.get(), mese_var.get(), anno_var.get())).grid(row=1, column=0)
+            btn_calcoloQuery = tk.Button(db_param_frame_user, text="Controlla", command=lambda : lista_partite_effettuate_torneo(conn, giorno_var.get(), mese_var.get(), anno_var.get())).grid(row=1, column=0)
         
         #U2: Top 10 giocatori con il punteggio più alto
 

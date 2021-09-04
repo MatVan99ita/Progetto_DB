@@ -1,9 +1,7 @@
 import sqlite3
 from sqlite3 import Error
-import tkinter as tk
 
-window_main = tk.Tk()
-window_main.title("Game Client")
+dati=[]
 
 def create_connection(db_file):
     """ create a database connection to the SQLite database
@@ -60,11 +58,11 @@ def inserisci(conn, istruzione_d_inserimento):
 
 ######################################## FUNZIONI ADMIN ####################################################
 
-def inserimento_nuova_fiera(conn, <parametri>):
+def inserimento_nuova_fiera(conn):
     print()
     sql = """ INSERT INTO Fiera(...) VALUES (...variabili da input...)"""
 
-def inserimento_nuovo_torneo(conn, <parametri>):
+def inserimento_nuovo_torneo(conn):
     print()
     sql = """ INSERT INTO Fiera(...) VALUES (...variabili da input...)"""
 
@@ -73,7 +71,7 @@ def gioco_con_maggior_partite_unofficial(conn):
     sql = """ SELECT <parametri>, MAX(numeroPartite) AS NumeroPartiteNonUfficiali FROM Gioco non ufficiale Gnu, Gioco da tavolo Gdt WHERE Gnu.codGioco = Gdt.codGioco """
 
 
-def aggiornamento_dipendenti(conn, <parametri>):
+def aggiornamento_dipendenti(conn):
     if(True):
         sql = """ UPDATE """
     else:
@@ -84,7 +82,7 @@ def lista_vendite_stand(conn, stand):
     sql = """ SELECT * FROM Vendite WHERE codStand=%s """ % stand
 
 
-def aggiornamento_formato(conn, formato, <parametri>):
+def aggiornamento_formato(conn, formato):
     sql = """ UPDATE Formato SET <parametri> WHERE IdFormato=%s """ % formato
 
 
@@ -93,8 +91,27 @@ def aggiornamento_formato(conn, formato, <parametri>):
 
 ######################################## FUNZIONI UTENTE ####################################################
 
-def lista_partite_effettuate_torneo(conn, torneo):
-    sql = """ SELECT <parametri> FROM Torneo WHERE CodTorneo=%s""" % torneo
+def lista_partite_effettuate_torneo(conn, giorno, mese, anno):
+
+    data=str(anno)+"-"+str(mese)+"-"+str(giorno)
+
+    sql="""SELECT *
+        FROM 	TORNEI T, PARTITE_UFFICIALI PU, DIPENDENTI D, PADIGLIONI P, VINCITORI V, PERDENTI PE, CONCORRENTI C
+        WHERE T.IdTorneo = PU.IdTorneo AND
+        D.CodiceBadge = PU.IdGiudice AND
+        P.CodPadiglione = PU.CodPadiglione AND
+    PU.IdMatch = V.IdMatch AND
+    PU.IdMatch = PE.IdMatch AND
+    PE.codConcorrente = C. codConcorrente AND
+    V.codConcorrente = C. codConcorrente AND
+    T.dataTorneo=%s;""" & data
+
+    cursor=conn.cursor()
+    cursor.execute(sql)
+    records=cursor.fetchall()
+
+    return records
+
 
 
 def gioco_con_maggior_tornei(conn, gioco):
