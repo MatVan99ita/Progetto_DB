@@ -13,7 +13,6 @@ screen_height = window_main.winfo_screenheight()
 password_entry=tk.StringVar()
 name_entry=tk.StringVar()
 
-nomeFrame=Frame()
 
 def Admin_login(log):
     if(log):
@@ -41,15 +40,21 @@ def calcolo_dimensioni_finestra(frame):
 
 
 
+nomeFrame=Frame()
 
 def program_start(tipologia_utente):
-        
+    dimensioni_frame_tabella=calcolo_dimensioni_finestra("GUI principale")
+    dimensioni_frame_tabella=dimensioni_frame_tabella.split("x")
+    print(dimensioni_frame_tabella)
     if(tipologia_utente=="user"):
         nomeFrame=top_frame
         top_welcome_frame.pack_forget()
         window_main.geometry(calcolo_dimensioni_finestra("GUI principale"))
         top_frame.pack(side=tk.TOP)
-        print("accesso utente")
+        
+        db_frame_user = tk.Frame(nomeFrame, highlightbackground="green", highlightcolor="green", highlightthickness=1, background='grey', width=dimensioni_frame_tabella[0], height=dimensioni_frame_tabella[1])
+        db_frame_user.pack(side=tk.RIGHT)
+
     elif(tipologia_utente=="admin"):
         print("acceso admin")
         nomeFrame=admin_frame
@@ -59,6 +64,8 @@ def program_start(tipologia_utente):
         
         #if(nome=='mat' and passw=='123'):
         admin_frame.pack(side=tk.TOP)
+        db_frame_user = tk.Frame(nomeFrame, highlightbackground="green", highlightcolor="green", highlightthickness=1, background='grey', width=dimensioni_frame_tabella[0], height=dimensioni_frame_tabella[1])
+        db_frame_user.pack(side=tk.RIGHT)
         #else:
         #    print("errore user e/o password")
         #controllo sulle credenziali
@@ -186,15 +193,7 @@ admin_frame.pack_forget()
 
 
 ################### DATABASE FRAME ##################
-dimensioni_frame_tabella=calcolo_dimensioni_finestra("GUI principale")
-dimensioni_frame_tabella=dimensioni_frame_tabella.split("x")
-print(dimensioni_frame_tabella)
 
-db_frame_user = tk.Frame(nomeFrame, highlightbackground="green", highlightcolor="green", highlightthickness=1, background='grey', width=dimensioni_frame_tabella[0], height=dimensioni_frame_tabella[1])
-
-#tabella
-
-db_frame_user.pack(side=tk.RIGHT)
 
 
 window_main.mainloop()
