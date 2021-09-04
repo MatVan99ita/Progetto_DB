@@ -1,8 +1,8 @@
 
 import tkinter as tk
-import tkinter.font as tkfont
 from tkinter import *
-from tkinter import Listbox as LB
+from tkinter import Listbox
+from tkinter import messagebox as msg
 window_main = tk.Tk()
 window_main.title("ChallengeUP Games")
 admin_log=False
@@ -11,6 +11,8 @@ screen_height = window_main.winfo_screenheight()
 
 password_entry=tk.StringVar()
 name_entry=tk.StringVar()
+
+dataTorneo=tk.StringVar()
 
 v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
 
@@ -87,41 +89,62 @@ def genera_tabella_query(tipo, ris):
             for j in range(total_columns):
                 e = Listbox(db_frame_user, width=int(dimensione_colonna), height=1)
                 e.grid(row=i, column=j)
-                e.insert(i, ris[i][j])
+                e.insert(j, ris[i][j])
     else:
         for i in range(total_rows):
             for j in range(total_columns):
                 e = Listbox(db_frame_admin, width=int(dimensione_colonna), height=1)
                 e.grid(row=i, column=j)
-                e.insert(i, ris[i][j])
+                e.insert(ris[i][j], ris[i][j])
 
+def controlloData(giorno, mese, anno):
+    g=len(giorno)
+    m=len(mese)
+    y=len(anno)
+    gg=int(giorno)
+    mm=int(mese)
+    yy=int(anno)
+    if( (gg%2!=0 and gg%2!=1) and (mm%2!=0 and mm%2!=1) and (yy%2!=0 and yy%2!=1) ):
+        msg.showerror(title="FORMATTAZIONE DATA ERRATA", message="Non esiste un valore numerico")
+    
+    if(g>2 and m>2 and y>4):
+        msg.showerror(title="FORMATTAZIONE DATA ERRATA", message="Valori con troppi caratteri")
+    else:
+        genera_tabella_query("user", [["giorno", "mese", "anno"], [giorno, mese, anno]])
 
 def genera_parametri(azione):
+    
+    
+        if(azione=="U1"):#Lista delle partite effettuate in un torneo svolto in una data specificata
+            giorno_var=tk.StringVar()
+            mese_var=tk.StringVar()
+            anno_var=tk.StringVar()
+            lbl_dataTorneo = tk.Label(db_param_frame_user, text="Inserire data GIORNO(gg)/MESE(mm)/ANNO(yyyy)").grid(row=0, column=0)
+            ent_giorno = tk.Entry(db_param_frame_user, textvariable=giorno_var).grid(row=0, column=1)
+            ent_mese = tk.Entry(db_param_frame_user, textvariable=mese_var).grid(row=0, column=2)
+            ent_anno = tk.Entry(db_param_frame_user, textvariable=anno_var).grid(row=0, column=3)
 
-        if(azione=="U1"):
-            lbl_dataTorneo = tk.Label(db_param_frame_user, text="Inserire data formato GG/MM/YYYY")
-            ent_dataTorneo = tk.Entry(db_param_frame_user)
-            btn_calcoloQuery = tk.Button(db_param_frame_user, text="Controlla", command=lambda : genera_tabella_query(v)).grid(row=2, column=0)
+            btn_calcoloQuery = tk.Button(db_param_frame_user, text="Controlla", command=lambda : controlloData(giorno_var.get(), mese_var.get(), anno_var.get())).grid(row=1, column=0)
+        
+        #U2: Top 10 giocatori con il punteggio più alto
 
-        elif(azione=="U2"):
+        elif(azione=="U3"):#Lista delle carte bandite dall'attuale formato
             print()
-        elif(azione=="U3"):
+        elif(azione=="U4"):#Lista delle carte di un mazzo specificato
             print()
-        elif(azione=="U4"):
+        elif(azione=="A1"):#
             print()
-        elif(azione=="A1"):
+        elif(azione=="A2"):#
             print()
-        elif(azione=="A2"):
+        elif(azione=="A3"):#
             print()
-        elif(azione=="A3"):
+        elif(azione=="A4"):#
             print()
-        elif(azione=="A4"):
+        elif(azione=="A5"):#
             print()
-        elif(azione=="A5"):
+        elif(azione=="A6"):#
             print()
-        elif(azione=="A6"):
-            print()
-        elif(azione=="A7"):
+        elif(azione=="A7"):#
             print()
 
 
