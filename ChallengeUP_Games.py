@@ -2,8 +2,7 @@
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import *
-from tkinter import ttk
-
+from tkinter import Listbox as LB
 window_main = tk.Tk()
 window_main.title("ChallengeUP Games")
 admin_log=False
@@ -13,6 +12,7 @@ screen_height = window_main.winfo_screenheight()
 password_entry=tk.StringVar()
 name_entry=tk.StringVar()
 
+v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
 
 def Admin_login(log):
     if(log):
@@ -24,67 +24,111 @@ def Admin_login(log):
         program_start("user")
     
 
-def calcolo_dimensioni_finestra(frame, larg=0):
+def calcolo_dimensioni_finestra(frame, alt=0, larg=0):
+
     if(frame=="inizio"):
         nuova_altezza=(10*screen_height)/100
         nuova_larghezza=(20*screen_width)/100
-    elif("GUI principale"):#finestra principale
+
+    elif(frame=="GUI principale"):#finestra principale
         nuova_altezza=(75*screen_height)/100
-        nuova_larghezza=(50*screen_width)/100
-    elif("frame tabella"):#frame tabella
+        nuova_larghezza=(80*screen_width)/100
+
+    elif(frame=="frame tabella"):#frame tabella
         nuova_altezza=(75*screen_height)/100
         nuova_larghezza=((50*screen_width)/2)/100
-    elif("tabella"):
-        nuova_larghezza=(50*screen_width)/larg)/100
+
+    #CALCOLO DELLE DIMENSIONI DELLE COLONNE IN BASE AL NUMERO
+    elif(frame=="tabella"):
+        #dimensione del frame della tabella
+        nuova_larghezza=((50*screen_width)/2)/100
+        nuova_altezza=(75*screen_height)/100
+        #suddivisione per la query
+        nuova_larghezza=(nuova_larghezza/larg)/4
+        return nuova_larghezza
+
     geometria="%dx%d" % (nuova_larghezza, nuova_altezza)
 
     return geometria
 
 
-
 nomeFrame=Frame()
 
 def program_start(tipologia_utente):
-    dimensioni_frame_tabella=calcolo_dimensioni_finestra("GUI principale")
-    dimensioni_frame_tabella=dimensioni_frame_tabella.split("x")
-    print(dimensioni_frame_tabella)
+    
     if(tipologia_utente=="user"):
-        nomeFrame=top_frame
         top_welcome_frame.pack_forget()
         window_main.geometry(calcolo_dimensioni_finestra("GUI principale"))
+
         top_frame.pack(side=tk.TOP)
         
-        db_frame_user = tk.Frame(nomeFrame, highlightbackground="green", highlightcolor="green", highlightthickness=1, background='grey', width=dimensioni_frame_tabella[0], height=dimensioni_frame_tabella[1])
-        db_frame_user.pack(side=tk.RIGHT)
 
     elif(tipologia_utente=="admin"):
         print("acceso admin")
-        nomeFrame=admin_frame
         top_welcome_frame.pack_forget()
     
         window_main.geometry(calcolo_dimensioni_finestra("GUI principale"))
         
         #if(nome=='mat' and passw=='123'):
         admin_frame.pack(side=tk.TOP)
-        db_frame_user = tk.Frame(nomeFrame, highlightbackground="green", highlightcolor="green", highlightthickness=1, background='grey', width=dimensioni_frame_tabella[0], height=dimensioni_frame_tabella[1])
-        db_frame_user.pack(side=tk.RIGHT)
         #else:
         #    print("errore user e/o password")
         #controllo sulle credenziali
 
 
-def genera_tabella_query(ris):
+def genera_tabella_query(tipo, ris):
     total_rows=len(ris)
     total_columns=len(ris[0])
-    dimensione_colonna=int(total_columns*3)
-    for i in range(total_rows):
-            for j in range(total_columns):
 
-                e = Entry(db_frame_user, width=dimensione_colonna,font=('Arial',16,'bold'))
+    dimensione_colonna=calcolo_dimensioni_finestra("tabella", total_rows, total_columns)
+    print(dimensione_colonna)
+    if(tipo=="user"):
+        for i in range(total_rows):
+            for j in range(total_columns):
+                e = Listbox(db_frame_user, width=int(dimensione_colonna), height=1)
                 e.grid(row=i, column=j)
-                e.insert(END, ris[i][j])
+                e.insert(i, ris[i][j])
+    else:
+        for i in range(total_rows):
+            for j in range(total_columns):
+                e = Listbox(db_frame_admin, width=int(dimensione_colonna), height=1)
+                e.grid(row=i, column=j)
+                e.insert(i, ris[i][j])
+
+
+def genera_parametri(azione):
+
+        if(azione=="U1"):
+            lbl_dataTorneo = tk.Label(db_param_frame_user, text="Inserire data formato GG/MM/YYYY")
+            ent_dataTorneo = tk.Entry(db_param_frame_user)
+            btn_calcoloQuery = tk.Button(db_param_frame_user, text="Controlla", command=lambda : genera_tabella_query(v)).grid(row=2, column=0)
+
+        elif(azione=="U2"):
+            print()
+        elif(azione=="U3"):
+            print()
+        elif(azione=="U4"):
+            print()
+        elif(azione=="A1"):
+            print()
+        elif(azione=="A2"):
+            print()
+        elif(azione=="A3"):
+            print()
+        elif(azione=="A4"):
+            print()
+        elif(azione=="A5"):
+            print()
+        elif(azione=="A6"):
+            print()
+        elif(azione=="A7"):
+            print()
+
 
 window_main.geometry(calcolo_dimensioni_finestra("inizio"))
+dimensioni_frame_tabella=calcolo_dimensioni_finestra("GUI principale")
+dimensioni_frame_tabella=dimensioni_frame_tabella.split("x")
+
 
 
 ##################################### FINESTRA LOG IN ####################################################
@@ -126,13 +170,17 @@ top_welcome_frame.pack(side=tk.TOP)
 
 
 top_frame = tk.Frame(window_main)
+
+lbl_line = tk.Label(top_frame, text="***********************************************************").pack()
+lbl_line = tk.Label(top_frame, text="**** SESSIONE UTENTE ****", font = "Helvetica 13 bold", foreground="blue").pack()
+lbl_line = tk.Label(top_frame, text="***********************************************************").pack()
+
 #####################################
 top_left_frame = tk.Frame(top_frame, highlightbackground="green", highlightcolor="green", highlightthickness=1)
 
-v=[[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4],[5,5,5,5],[6,6,6,6]]
-print(v)
 
-btn_U1=tk.Button(top_left_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_tabella_query(v)).grid(row=0, column=0)
+
+btn_U1=tk.Button(top_left_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U1")).grid(row=0, column=0)
 btn_U2=tk.Button(top_left_frame, text="Top 10 giocatori con il punteggio più alto", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=1, column=0)
 btn_U3=tk.Button(top_left_frame, text="Lista delle carte bandite dall'attuale formato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=2, column=0)
 btn_U4=tk.Button(top_left_frame, text="Lista delle carte di un mazzo specificato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=3, column=0)
@@ -141,15 +189,15 @@ top_left_frame.pack(side=tk.LEFT)
 
 
 ################### DATABASE FRAME USER ##################
-db_frame_user = tk.Frame(window_main, highlightbackground="green", highlightcolor="green", highlightthickness=1)
 
-#tabella
-lbl_prova=tk.Label(text="colonne db")
-
-db_frame_user.pack(side=tk.RIGHT)
+#parametri
+db_param_frame_user = tk.Frame(top_frame, highlightbackground="green", highlightcolor="green", highlightthickness=1)
+db_param_frame_user.pack(side=tk.BOTTOM)
 
 #####################################
+db_frame_user = tk.Frame(top_frame, highlightbackground="green", highlightcolor="green", highlightthickness=1, width=dimensioni_frame_tabella[0], height=dimensioni_frame_tabella[1])
 
+db_frame_user.pack(side=tk.RIGHT)
 
 top_frame.pack_forget()
 #####################################
@@ -160,7 +208,6 @@ top_frame.pack_forget()
 ############################# SEZIONE ADMIN #############################################
 
 admin_frame = tk.Frame(window_main)
-
 
 lbl_line = tk.Label(admin_frame, text="***********************************************************").pack()
 lbl_line = tk.Label(admin_frame, text="**** SESSIONE ADMIN ****", font = "Helvetica 13 bold", foreground="blue").pack()
@@ -185,9 +232,15 @@ btn_A7=tk.Button(final_frame, text="Registrazione vendita per stand", highlightb
 
 final_frame.pack(side=tk.LEFT)
 
+#parametri
+db_param_frame_admin = tk.Frame(admin_frame, highlightbackground="green", highlightcolor="green", highlightthickness=1)
+db_param_frame_admin.pack(side=tk.BOTTOM)
 
 
 #####################################
+db_frame_admin = tk.Frame(admin_frame, highlightbackground="green", highlightcolor="green", highlightthickness=1, width=dimensioni_frame_tabella[0], height=dimensioni_frame_tabella[1])
+
+db_frame_admin.pack(side=tk.RIGHT)
 
 admin_frame.pack_forget()
 
