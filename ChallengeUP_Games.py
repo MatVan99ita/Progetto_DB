@@ -118,12 +118,13 @@ def controlloData(giorno, mese, anno):
         msg.showerror(title="FORMATTAZIONE DATA ERRATA", message="Valori con troppi caratteri")
         return 1
 
-    return 0
+    #formattazione della data secondo i database
+    return anno + "-" + mese + "-" + giorno
     
 #U1
 def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
-    if(controlloData(giorno, mese, anno)==0):
-        data=str(anno)+"-"+str(mese)+"-"+str(giorno)
+    if(controlloData(giorno, mese, anno) != 1):
+        data=controlloData(giorno, mese, anno)
 
         sql="""SELECT *
             FROM 	TORNEI T, PARTITE_UFFICIALI PU, DIPENDENTI D, PADIGLIONI P, VINCITORI V, PERDENTI PE, CONCORRENTI C
@@ -134,11 +135,11 @@ def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
             PU.IdMatch = PE.IdMatch AND
             PE.codConcorrente = C. codConcorrente AND
             V.codConcorrente = C. codConcorrente AND
-            T.dataTorneo=%s;""" % data
+            T.dataTorneo=(?);"""
 
         colonne=["IdTorneo","nomeTorneo", "numeroSpettatori", "numeroPartecipanti", "codGioco", "IdFiera", "IdMatch", "dataPartita", "nomePadiglione", ]
         cursor=conn.cursor()
-        cursor.execute(sql)
+        cursor.execute(sql, data)
         records=cursor.fetchall()
         v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
         genera_tabella_query(ruolo, v)
@@ -153,12 +154,12 @@ def top_giocatori(ruolo, IdGiocatore):
         P.IdMatch = PU.IdMatch AND
         C.codConcorrente = V.codConcorrente AND
         C.codConcorrente = P.codConcorrente AND
-        CodConcorrente = %d
-        GROUP BY IdTorneo;""" % IdGiocatore
+        CodConcorrente = (?)
+        GROUP BY IdTorneo;"""
 
     colonne=["IdGiocatore", "Punteggio totale"]
     cursor=conn.cursor()
-    cursor.execute(sql)
+    cursor.execute(sql, IdGiocatore)
     records=cursor.fetchall()
     v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
     genera_tabella_query(ruolo, v)
@@ -187,17 +188,165 @@ def lista_carte_mazzo(ruolo, mazzo):
             FROM MAZZI M, CARTE C, COMPOSTI CO
             WHERE CO.codiceMazzo = M.codiceMazzo AND
             C.codCarta = CO.codCarta AND
-            codiceMazzo = %d
-            """ % mazzo
+            codiceMazzo = (?)
+            """
 
     colonne=["codMazzo", "Colore", "codCarta", "nome", "tipo", "descrizione", "Costo", "Attributo", "Attacco", "Difesa", "Effetto"]
+    cursor=conn.cursor()
+    cursor.execute(sql, mazzo)
+    records=cursor.fetchall()
+    print(colonne)
+    print(records)
+    v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+    genera_tabella_query(ruolo, v)
+
+
+def inserimento_Fiera(via, numeroCivico, IdCittà, IdNazione, nomeFiera, dataInizioFiera, dataFineFiera):
+
+    if(controlloData(dataInizioFiera[0], dataInizioFiera[1], dataInizioFiera[2]) != 1 and controlloData(dataFineFiera[0], dataFineFiera[1], dataFineFiera[2]) != 1):
+        
+        #formattazione delle date
+        dataInizio=controlloData(dataInizioFiera[0], dataInizioFiera[1], dataInizioFiera[2])
+        dataFine=controlloData(dataFineFiera[0], dataFineFiera[1], dataFineFiera[2])
+
+        sql=""" INSERT INTO FIERE (via, numeroCivico, IDcittà, IDnazione, nomeFiera, dataInizioFiera, dataFineFiera) 
+        VALUES ( (?), (?), (?), (?), (?), (?), (?) )"""
+        
+        dati=(via, numeroCivico, IdCittà, IdNazione, nomeFiera, dataInizio, dataFine)
+        cursor=conn.cursor()
+        try:
+            cursor.execute(sql, dati)
+            conn.commit()
+        except:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+
+
+def inserimento_Torneo(dataTorneo, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera):
+    if(controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2]) != 1):
+        
+        #formattazione delle date
+        dataT=controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2])
+    
+        sql=""" INSERT INTO TORNEI (dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera) 
+        VALUES ((?), (?), (?), (?), (?), (?))"""
+        
+        dati=(dataT, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera)
+        cursor=conn.cursor()
+        try:
+            cursor.execute(sql, dati)
+            conn.commit()
+        except:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+
+
+def gioco_partite_ufficiose():
+    sql=""" SELECT TOP 1 WITH TIES nomeGioco, descrizione, regolamento, SUM(numeroPartite) AS partiteTotali
+            FROM PARTITE NON UFFICIALI PNU, GIOCHI DA TAVOLO G
+            WHERE PNU.CodGioco = G.CodGioco
+            GROUP BY CodGioco
+            ORDER BY 4
+            """
+
+    colonne=["Nome", "Descrizione", "Regolamento", "Partite totali"]
     cursor=conn.cursor()
     cursor.execute(sql)
     records=cursor.fetchall()
     print(colonne)
     print(records)
     v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
-    genera_tabella_query(ruolo, v)
+    genera_tabella_query("admin", v)
+
+def guadagni_stands():
+    sql=""" SELECT CodStand, SUM(prezzoTotale) AS guadagno
+            FROM VENDITE 
+            GROUP BY CodStand
+
+            """
+
+    colonne=["CodStand", "Guadagno"]
+    cursor=conn.cursor()
+    cursor.execute(sql)
+    records=cursor.fetchall()
+    print(colonne)
+    print(records)
+    v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+    genera_tabella_query("admin", v)
+
+def inserimento_Dipendente(dataTorneo, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera):
+    sql=""" INSERT INTO TORNEI (dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera) 
+    VALUES ((?), (?), (?), (?), (?), (?))"""
+    
+    data=(dataTorneo, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera)
+    cursor=conn.cursor()
+    try:
+        cursor.execute(sql, data)
+        conn.commit()
+    except:
+        msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+
+def registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand, prezzoTotale, CodVendita=0, CodGioco=0, CodStand=0, quantitàGiochiSelezionati=0):
+    if(controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2]) != 1):
+        
+        #formattazione delle date
+        dataT=controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2])
+    
+        sql=""" INSERT INTO VENDITE (CodVendita, dataVendita, CodStand, prezzoTotale) VALUES (?, ?, ?, ?, ?)"""
+        dati=(codVendita, dataVendita, codStand, prezzoTotale)
+        cursor=conn.cursor()
+        if(tipologia_prodotto=="Gioco da tavolo"):
+            sql.append("""INSERT INTO VEN_GIOCHI (CodVendita, CodGioco, CodStand, quantitàGiochiSelezionati) VALUES (?, ?, ?, ?)""")
+            dati.append(CodVendita, CodGioco, CodStand, quantitàGiochiSelezionati)
+            try:
+                cursor.execute(sql, dati)
+                conn.commit()
+            except:
+                msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+        else:
+        dati=(dataT, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera)
+        try:
+            cursor.execute(sql, dati)
+            conn.commit()
+        except:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+
+def vendita_gioco():
+    sql.append("""INSERT INTO VEN_GIOCHI (CodVendita, CodGioco, CodStand, quantitàGiochiSelezionati) VALUES (?, ?, ?, ?)""")
+    dati.append(CodVendita, CodGioco, CodStand, quantitàGiochiSelezionati)
+    try:
+        cursor.execute(sql, dati)
+        conn.commit()
+    except:
+        msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+        
+def vendita_Materiale():
+    sql.append("""INSERT INTO VEN_MATERIALI (CodVendita, CodMateriale, CodStand, quantitàMaterialiSelezionati) VALUES (?, ?, ?, ?);
+    UPDATE IMMAGAZZINATI SET quantitàMateriali = quantitàMateriali - quantitàMaterialiSelezionati  WHERE CodGioco = ? AND CodStand = ?""")
+    dati=()
+    try:
+        cursor.execute(sql, dati)
+        conn.commit()
+    except:
+        msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+        
+
+
+def inserimento_Formato(dataTorneo, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera):
+    if(controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2]) != 1):
+        
+        #formattazione delle date
+        dataT=controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2])
+    
+        sql=""" INSERT INTO TORNEI (dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera) 
+        VALUES ((?), (?), (?), (?), (?), (?))"""
+        
+        dati=(dataT, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera)
+        cursor=conn.cursor()
+        try:
+            cursor.execute(sql, dati)
+            conn.commit()
+        except:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+
 
 def genera_parametri(azione, ruolo):
         nomeFrame=tk.Frame()
@@ -224,25 +373,29 @@ def genera_parametri(azione, ruolo):
             btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : top_giocatori(ruolo, giocatore_var.get())).grid(row=1, column=0)
         
         #elif(azione=="U3"):#Lista delle carte bandite dall'attuale formato
+        #questa richiede solo la data attuale presa direttamente da sistema
+
         elif(azione=="U4"):#Lista delle carte di un mazzo specificato
             mazzo_var=tk.StringVar()
             lbl_Mazzo = tk.Label(nomeFrame, text="Inserire codice mazzo:").grid(row=0, column=0)
             ent_Mazzo = tk.Entry(nomeFrame, textvariable=mazzo_var).grid(row=0, column=1)
             btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : lista_carte_mazzo(ruolo, mazzo_var.get())).grid(row=1, column=0)
-        
-        elif(azione=="A1"):#
+
+        elif(azione=="A1"):#Inserimento nuova fiera
             print()
-        elif(azione=="A2"):#
+        elif(azione=="A2"):#Inserimento nuovo torneo
             print()
-        elif(azione=="A3"):#
+        elif(azione=="A3"):#Inserimento dipendente
             print()
-        elif(azione=="A4"):#
+        elif(azione=="A4"):#Inserimento nuovo formato
             print()
-        elif(azione=="A5"):#
+        elif(azione=="A5"):#Gioco da tavolo con più partite non ufficiali
             print()
-        elif(azione=="A6"):#
+        elif(azione=="A6"):#Il gioco più venduto per ogni stand
             print()
-        elif(azione=="A7"):#
+        elif(azione=="A7"):#Registrazione vendita per stand
+            print()
+        elif(azione=="A8"):#Guadagno di ogni stand
             print()
 
 
@@ -349,6 +502,7 @@ btn_A4=tk.Button(final_frame, text="Inserimento nuovo formato", highlightbackgro
 btn_A5=tk.Button(final_frame, text="Gioco da tavolo con più partite non ufficiali", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=9, column=0)
 btn_A6=tk.Button(final_frame, text="Il gioco più venduto per ogni stand", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=10, column=0)
 btn_A7=tk.Button(final_frame, text="Registrazione vendita per stand", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=11, column=0)
+btn_A8=tk.Button(final_frame, text="Guadagno di ogni stand", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=11, column=0)
 
 
 final_frame.pack(side=tk.LEFT)
