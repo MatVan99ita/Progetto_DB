@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import *
 from tkinter import Listbox
 from tkinter import messagebox as msg
-import lib_query
 import sqlite3 as lite
 from sqlite3 import Error
 import connessione_DB
@@ -259,22 +258,22 @@ def gioco_partite_ufficiose():
     genera_tabella_query("admin", tabella)
 
 def guadagni_stands():
-    sql=""" SELECT V.codStand, SUM(prezzoTotale) AS guadagnoTotale, 
+    sql=""" SELECT V.IdStand, SUM(prezzoTotale) AS guadagnoTotale, 
                 (
                     SELECT AVG(prezzoTotale) 
                     FROM VENDITE V1, VEN_GIOCO VG 
-                    WHERE V1.codStand = VG.codStand AND V1.codVendita = VG.codVendita AND V1.codStand = V.codStand
+                    WHERE V1.IdStand = VG.IdStand AND V1.codVendita = VG.codVendita AND V1.IdStand = V.IdStand
                 ) AS guadagnoMedioGiochiDaTavolo,
                 (
                     SELECT AVG(prezzoTotale) 
                     FROM VENDITE V1, VEN_MAT VM 
-                    WHERE V1.codStand = VM.codStand AND V1.codVendita = VM.codVendita AND V1.codStand = V.codStand
+                    WHERE V1.IdStand = VM.IdStand AND V1.codVendita = VM.codVendita AND V1.IdStand = V.IdStand
                 ) AS guadagnoMedioMaterialiDaGioco
             FROM VENDITE V
-            GROUP BY V.codStand
+            GROUP BY V.IdStand
         """
 
-    colonne=["CodStand", "Guadagno"]
+    colonne=["IdStand", "Guadagno"]
     cursor=conn.cursor()
     cursor.execute(sql)
     records=cursor.fetchall()
@@ -295,15 +294,15 @@ def inserimento_Dipendente(nome, cognome, ruolo, dataNascita):
         except Error as e:
             msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento del dipendente\n"+str(e))
 
-def registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand, prezzoTotale, CODICE_PRODOTTO, quantità):
+def registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, IdStand, prezzoTotale, CODICE_PRODOTTO, quantità):
     if(controlloData(dataVendita[0], dataVendita[1], dataVendita[2]) != 1):
         
         #formattazione delle date
         dataV=controlloData(dataVendita[0], dataVendita[1], dataVendita[2])
     
-        sql=""" INSERT INTO VENDITE(CodVendita, dataVendita, codStand, prezzoTotale) 
+        sql=""" INSERT INTO VENDITE(CodVendita, dataVendita, IdStand, prezzoTotale) 
                     VALUES((?), (?), (?), (?))"""
-        dati=(int(codVendita), dataV, int(codStand), prezzoTotale)
+        dati=(int(codVendita), dataV, int(IdStand), prezzoTotale)
         cursor=conn.cursor()
         try:
             cursor.execute(sql, dati)
@@ -313,9 +312,9 @@ def registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand
 
 
         if(tipologia_prodotto=="Gioco da tavolo"):
-            sql="""INSERT INTO VEN_GIOCHI(codVendita, codGioco, codStand, quantitàGiochiSelezionati) 
+            sql="""INSERT INTO VEN_GIOCHI(codVendita, codGioco, IdStand, quantitàGiochiSelezionati) 
                         VALUES((?), (?), (?), (?))"""
-            dati=(codVendita, CODICE_PRODOTTO, codStand, quantità)
+            dati=(codVendita, CODICE_PRODOTTO, IdStand, quantità)
             try:
                 cursor.execute(sql, dati)
                 conn.commit()
@@ -324,9 +323,9 @@ def registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand
         
         elif(tipologia_prodotto=="Materiale di gioco"):
             
-            sql="""INSERT INTO VEN_MATERIALI(codVendita, codMateriale, codStand, quantitàMaterialiSelezionati) 
+            sql="""INSERT INTO VEN_MATERIALI(codVendita, codMateriale, IdStand, quantitàMaterialiSelezionati) 
                         VALUES((?), (?), (?), (?));"""
-            dati=(codVendita, CODICE_PRODOTTO, codStand, quantità)
+            dati=(codVendita, CODICE_PRODOTTO, IdStand, quantità)
             try:
                 cursor.execute(sql, dati)
                 conn.commit()
@@ -334,8 +333,8 @@ def registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand
                 msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento dei matriali di gioco\n"+str(e))
             
             sql="""UPDATE IMMAGAZZINATI SET quantitàMateriali = quantitàMateriali - quantitàMaterialiSelezionati 
-                         WHERE CodGioco = (?) AND CodStand = (?)"""
-            dati=(CODICE_PRODOTTO, codStand)
+                         WHERE CodGioco = (?) AND IdStand = (?)"""
+            dati=(CODICE_PRODOTTO, IdStand)
             try:
                 cursor.execute(sql, dati)
                 conn.commit()
@@ -538,7 +537,7 @@ def genera_parametri(azione, ruolo):
                 command=lambda : inserimento_Formato( (GiornoInizio_var.get(), MeseInizio_var.get(), AnnoInizio_var.get()), (GiornoFine_var.get(), MeseFine_var.get(), AnnoFine_var.get()), gioco_var.get() ) ).grid(row=3, column=0)
         
         elif(azione=="A7"):#Registrazione vendita per stand
-            #registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand, prezzoTotale, CODICE_PRODOTTO, quantità)
+            #registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, IdStand, prezzoTotale, CODICE_PRODOTTO, quantità)
             
             tipologia=["Gioco da tavolo", "Materiale di gioco"]
             tipo_var=tk.StringVar()
@@ -578,7 +577,7 @@ def genera_parametri(azione, ruolo):
 
             btn_calcoloQuery = tk.Button(db_param_frame_admin, text="Inserisci scontrino", 
                 command=lambda : registro_vendite_stand(tipo_var.get(), vendita_var.get(), (GiornoVendita_var.get().get(), MeseVendita_var, AnnoVendita_var.get()), stand_var.get(), prezzo_var.get(), codiceProdotto_var.get(), quantity_var.get()) ).grid(row=3, column=0)
-                #tipologia_prodotto, codVendita, dataVendita, codStand, prezzoTotale, CODICE_PRODOTTO, quantità)
+                #tipologia_prodotto, codVendita, dataVendita, IdStand, prezzoTotale, CODICE_PRODOTTO, quantità)
 
 
         ################################ RICERCHE PER ADMIN ##################################################

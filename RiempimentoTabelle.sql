@@ -13,10 +13,10 @@ VALUES(?, ?, ?, ?, ?, ?);
 INSERT INTO STANDS(nome, IdFiera, CodiceBadge) 
 VALUES(?, ?, ?);
 
-INSERT INTO CONTENUTI(quantitàGiochi, codStand, codGioco)
+INSERT INTO CONTENUTI(quantitàGiochi, IdStand, codGioco)
 VALUES(?, ?, ?);
 
-INSERT INTO IMMAGAZZINATI(quantitàMateriale, codStand, codMateriale)
+INSERT INTO IMMAGAZZINATI(quantitàMateriale, IdStand, codMateriale)
 VALUES(?, ?, ?);
 
 INSERT INTO GIOCHI_DA_TAVOLO(nomeGioco, descrizione, regolamento)
