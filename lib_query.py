@@ -1,22 +1,19 @@
 import sqlite3
 from sqlite3 import Error
+import tkinter as tk
+from tkinter import *
+from tkinter import Listbox
+from tkinter import messagebox as msg
 
 dati=[]
+db_file=(r'.\ChallengeUPGames_DB.db')
+conn = None
+try:
+    conn = sqlite3.connect(db_file)
+except Error as e:
+    print(e)
+    msg.showerror(message="ERRORE CONNESSIONE")
 
-def create_connection(db_file):
-    """ create a database connection to the SQLite database
-        specified by db_file
-    :param db_file: database file
-    :return: Connection object or None
-    """
-    conn = None
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except Error as e:
-        print(e)
-
-    return conn
 
 
 def create_table(conn, create_table_sql):
@@ -55,35 +52,49 @@ def inserisci(conn, istruzione_d_inserimento):
         print(e)
 
 
+def controlloData(giorno, mese, anno):
+    g=len(giorno)
+    m=len(mese)
+    y=len(anno)
+    gg=int(giorno)
+    mm=int(mese)
+    yy=int(anno)
+    if( (gg%2!=0 and gg%2!=1) and (mm%2!=0 and mm%2!=1) and (yy%2!=0 and yy%2!=1) ):
+        msg.showerror(title="FORMATTAZIONE DATA ERRATA", message="Non esiste un valore numerico")
+        return 1
+    
+    if(g>2 and m>2 and y>4):
+        msg.showerror(title="FORMATTAZIONE DATA ERRATA", message="Valori con troppi caratteri")
+        return 1
+
+    #formattazione della data secondo i database
+    return anno + "-" + mese + "-" + giorno
+
+
+
+
 
 ######################################## FUNZIONI ADMIN ####################################################
 
-def inserimento_nuova_fiera(conn):
-    print()
-    sql = """ INSERT INTO Fiera(...) VALUES (...variabili da input...)"""
+def inserimento_Fiera(via, numeroCivico, IdCittà, IdNazione, nomeFiera, dataInizioFiera, dataFineFiera):
 
-def inserimento_nuovo_torneo(conn):
-    print()
-    sql = """ INSERT INTO Fiera(...) VALUES (...variabili da input...)"""
-
-
-def gioco_con_maggior_partite_unofficial(conn):
-    sql = """ SELECT <parametri>, MAX(numeroPartite) AS NumeroPartiteNonUfficiali FROM Gioco non ufficiale Gnu, Gioco da tavolo Gdt WHERE Gnu.codGioco = Gdt.codGioco """
-
-
-def aggiornamento_dipendenti(conn):
-    if(True):
-        sql = """ UPDATE """
-    else:
-        sql = """ INSERT INTO """
-
-
-def lista_vendite_stand(conn, stand):
-    sql = """ SELECT * FROM Vendite WHERE codStand=%s """ % stand
-
-
-def aggiornamento_formato(conn, formato):
-    sql = """ UPDATE Formato SET <parametri> WHERE IdFormato=%s """ % formato
+    if(controlloData(dataInizioFiera[0], dataInizioFiera[1], dataInizioFiera[2]) != 1 and controlloData(dataFineFiera[0], dataFineFiera[1], dataFineFiera[2]) != 1):
+        
+        #formattazione delle date
+        dataInizio=controlloData(dataInizioFiera[0], dataInizioFiera[1], dataInizioFiera[2])
+        dataFine=controlloData(dataFineFiera[0], dataFineFiera[1], dataFineFiera[2])
+        print(dataInizio)
+        print(dataFine)
+        sql=""" INSERT INTO FIERE (via, numeroCivico, IDcittà, IDnazione, nomeFiera, dataInizioFiera, dataFineFiera) 
+        VALUES ( (?), (?), (?), (?), (?), (?), (?) )"""
+        
+        dati=(via, numeroCivico, IdCittà, IdNazione, nomeFiera, dataInizio, dataFine)
+        cursor=con.cursor()
+        try:
+            cursor.execute(sql, dati)
+            #conn.commit()
+        except:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
 
 
 

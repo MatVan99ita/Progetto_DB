@@ -5,6 +5,9 @@ from tkinter import Listbox
 from tkinter import messagebox as msg
 import lib_query
 import sqlite3 as lite
+from sqlite3 import Error
+import connessione_DB
+
 
 window_main = tk.Tk()
 window_main.title("ChallengeUP Games")
@@ -17,9 +20,10 @@ name_entry=tk.StringVar()
 
 dataTorneo=tk.StringVar()
 
+connessione_DB.creazione_tabelle()
+
 conn=lite.connect("ChallengeUPGames_DB.db")
 cur=conn.cursor()
-
 
 def Admin_login(log):
     if(log):
@@ -201,6 +205,8 @@ def lista_carte_mazzo(ruolo, mazzo):
     genera_tabella_query(ruolo, v)
 
 
+######################################## FUNZIONI ADMIN ####################################################
+
 def inserimento_Fiera(via, numeroCivico, IdCittà, IdNazione, nomeFiera, dataInizioFiera, dataFineFiera):
 
     if(controlloData(dataInizioFiera[0], dataInizioFiera[1], dataInizioFiera[2]) != 1 and controlloData(dataFineFiera[0], dataFineFiera[1], dataFineFiera[2]) != 1):
@@ -209,34 +215,35 @@ def inserimento_Fiera(via, numeroCivico, IdCittà, IdNazione, nomeFiera, dataIni
         dataInizio=controlloData(dataInizioFiera[0], dataInizioFiera[1], dataInizioFiera[2])
         dataFine=controlloData(dataFineFiera[0], dataFineFiera[1], dataFineFiera[2])
 
-        sql=""" INSERT INTO FIERE (via, numeroCivico, IDcittà, IDnazione, nomeFiera, dataInizioFiera, dataFineFiera) 
-        VALUES ( (?), (?), (?), (?), (?), (?), (?) )"""
-        
-        dati=(via, numeroCivico, IdCittà, IdNazione, nomeFiera, dataInizio, dataFine)
+        sql=""" INSERT INTO FIERE(via, numeroCivico, Idcittà, Idnazione, nomeFiera, dataInizioFiera, dataFineFiera) 
+        VALUES((?), (?), (?), (?), (?), (?), (?));"""
+        print(dataInizio)
+        print(dataFine)
         cursor=conn.cursor()
+        dati=(via, numeroCivico, IdCittà, IdNazione, nomeFiera, dataInizio, dataFine)
         try:
             cursor.execute(sql, dati)
             conn.commit()
-        except:
-            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+        except Error as e:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera\n"+str(e))
 
 
-def inserimento_Torneo(dataTorneo, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera):
+def inserimento_Torneo(dataTorneo, nomeTorneo, numeroSpettatori, numeroPatecipanti, IdFiera, codGioco):
     if(controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2]) != 1):
         
         #formattazione delle date
         dataT=controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2])
     
-        sql=""" INSERT INTO TORNEI (dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera) 
-        VALUES ((?), (?), (?), (?), (?), (?))"""
+        sql=""" INSERT INTO TORNEI(dataTorneo, nomeTorneo, numeroSpettatori, numeroPartecipanti, IdFiera, codGioco) 
+        VALUES((?), (?), (?), (?), (?), (?))"""
         
-        dati=(dataT, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera)
+        dati=(dataT, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codGioco)
         cursor=conn.cursor()
         try:
             cursor.execute(sql, dati)
             conn.commit()
-        except:
-            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+        except Error as e:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento del torneo\n"+str(e))
 
 
 def gioco_partite_ufficiose():
@@ -272,62 +279,65 @@ def guadagni_stands():
     v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
     genera_tabella_query("admin", v)
 
-def inserimento_Dipendente(dataTorneo, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera):
-    sql=""" INSERT INTO TORNEI (dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera) 
-    VALUES ((?), (?), (?), (?), (?), (?))"""
-    
-    data=(dataTorneo, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera)
-    cursor=conn.cursor()
-    try:
-        cursor.execute(sql, data)
-        conn.commit()
-    except:
-        msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+def inserimento_Dipendente(nome, cognome, ruolo, dataNascita):
+    if(controlloData(dataNascita[0], dataNascita[1], dataNascita[2]) != 1):
+        sql=""" INSERT INTO DIPENDENTI(dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera) 
+        VALUES((?), (?), (?), (?), (?), (?))"""
+        
+        dati=(nome, cognome, ruolo, dataNascita)
+        cursor=conn.cursor()
+        try:
+            cursor.execute(sql, dati)
+            conn.commit()
+        except:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento del dipendente")
 
-def registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand, prezzoTotale, CodVendita=0, CodGioco=0, CodStand=0, quantitàGiochiSelezionati=0):
+def registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand, prezzoTotale, CODICE_PRODOTTO, quantità):
     if(controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2]) != 1):
         
         #formattazione delle date
         dataT=controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2])
     
-        sql=""" INSERT INTO VENDITE (CodVendita, dataVendita, CodStand, prezzoTotale) VALUES (?, ?, ?, ?, ?)"""
+        sql=""" INSERT INTO VENDITE(CodVendita, dataVendita, CodStand, prezzoTotale) VALUES((?), (?), (?), (?), (?))"""
         dati=(codVendita, dataVendita, codStand, prezzoTotale)
         cursor=conn.cursor()
+        try:
+            cursor.execute(sql, dati)
+            conn.commit()
+        except:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della vendita")
+
+
         if(tipologia_prodotto=="Gioco da tavolo"):
-            sql.append("""INSERT INTO VEN_GIOCHI (CodVendita, CodGioco, CodStand, quantitàGiochiSelezionati) VALUES (?, ?, ?, ?)""")
-            dati.append(CodVendita, CodGioco, CodStand, quantitàGiochiSelezionati)
+            sql="""INSERT INTO VEN_GIOCHI(CodVendita, CodGioco, CodStand, quantitàGiochiSelezionati) 
+                        VALUES((?), (?), (?), (?))"""
+            dati=(codVendita, CODICE_PRODOTTO, codStand, quantità)
+            try:
+                cursor.execute(sql, dati)
+                conn.commit()
+            except:
+                msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della vendita")
+        
+        elif(tipologia_prodotto=="Materiale di gioco"):
+            
+            sql="""INSERT INTO VEN_MATERIALI(CodVendita, CodMateriale, CodStand, quantitàMaterialiSelezionati) 
+                        VALUES((?), (?), (?), (?));"""
+            dati=(codVendita, CODICE_PRODOTTO, codStand, quantità)
             try:
                 cursor.execute(sql, dati)
                 conn.commit()
             except:
                 msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
-        else:
-        dati=(dataT, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera)
-        try:
-            cursor.execute(sql, dati)
-            conn.commit()
-        except:
-            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
-
-def vendita_gioco():
-    sql.append("""INSERT INTO VEN_GIOCHI (CodVendita, CodGioco, CodStand, quantitàGiochiSelezionati) VALUES (?, ?, ?, ?)""")
-    dati.append(CodVendita, CodGioco, CodStand, quantitàGiochiSelezionati)
-    try:
-        cursor.execute(sql, dati)
-        conn.commit()
-    except:
-        msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
-        
-def vendita_Materiale():
-    sql.append("""INSERT INTO VEN_MATERIALI (CodVendita, CodMateriale, CodStand, quantitàMaterialiSelezionati) VALUES (?, ?, ?, ?);
-    UPDATE IMMAGAZZINATI SET quantitàMateriali = quantitàMateriali - quantitàMaterialiSelezionati  WHERE CodGioco = ? AND CodStand = ?""")
-    dati=()
-    try:
-        cursor.execute(sql, dati)
-        conn.commit()
-    except:
-        msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
-        
+            
+            sql="""UPDATE IMMAGAZZINATI SET quantitàMateriali = quantitàMateriali - quantitàMaterialiSelezionati 
+                         WHERE CodGioco = (?) AND CodStand = (?)"""
+            dati=(CODICE_PRODOTTO, codStand)
+            try:
+                cursor.execute(sql, dati)
+                conn.commit()
+            except:
+                msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+            
 
 
 def inserimento_Formato(dataTorneo, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera):
@@ -336,8 +346,8 @@ def inserimento_Formato(dataTorneo, nomeTorneo, numeroPatecipanti, numeroSpettat
         #formattazione delle date
         dataT=controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2])
     
-        sql=""" INSERT INTO TORNEI (dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera) 
-        VALUES ((?), (?), (?), (?), (?), (?))"""
+        sql=""" INSERT INTO TORNEI(dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera) 
+        VALUES((?), (?), (?), (?), (?), (?))"""
         
         dati=(dataT, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera)
         cursor=conn.cursor()
@@ -382,8 +392,51 @@ def genera_parametri(azione, ruolo):
             btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : lista_carte_mazzo(ruolo, mazzo_var.get())).grid(row=1, column=0)
 
         elif(azione=="A1"):#Inserimento nuova fiera
-            print()
+            #INSERT INTO FIERE (via, numeroCivico, IDcittà, IDnazione, nomeFiera, dataInizioFiera, dataFineFiera) 
+            via_var=tk.StringVar()
+            numero_var=tk.StringVar()
+            city_var=tk.StringVar()
+            nazion_var=tk.StringVar()
+            fiera_var=tk.StringVar()
+
+            GiornoInizioFiera_var=tk.StringVar()
+            MeseInizioFiera_var=tk.StringVar()
+            AnnoInizioFiera_var=tk.StringVar()
+            
+            GiornoFineFiera_var=tk.StringVar()
+            MeseFineFiera_var=tk.StringVar()
+            AnnoFineFiera_var=tk.StringVar()
+
+            lbl_via = tk.Label(db_param_frame_admin, text="Inserire via(opzionale):").grid(row=0, column=0)
+            ent_via = tk.Entry(db_param_frame_admin, textvariable=via_var).grid(row=0, column=1)
+
+            lbl_numero = tk.Label(db_param_frame_admin, text="Inserire numero civico(opzionale):").grid(row=0, column=2)
+            ent_numero = tk.Entry(db_param_frame_admin, textvariable=numero_var).grid(row=0, column=3)
+
+            lbl_city = tk.Label(db_param_frame_admin, text="Inserire codice città(opzionale):").grid(row=1, column=0)
+            ent_city = tk.Entry(db_param_frame_admin, textvariable=city_var).grid(row=1, column=1)
+
+            lbl_nazion = tk.Label(db_param_frame_admin, text="Inserire codice nazione(opzionale):").grid(row=1, column=2)
+            ent_naizon = tk.Entry(db_param_frame_admin, textvariable=nazion_var).grid(row=1, column=3)
+
+            lbl_fiera = tk.Label(db_param_frame_admin, text="Inserire nome della fiera:").grid(row=1, column=4)
+            ent_fiera = tk.Entry(db_param_frame_admin, textvariable=fiera_var).grid(row=1, column=5)
+
+            lbl_dataInitFiera = tk.Label(db_param_frame_admin, text="Inserire data inizio fiera GG/MM/YYYY:").grid(row=2, column=0)
+            ent_GiornoInitFiera = tk.Entry(db_param_frame_admin, textvariable=GiornoInizioFiera_var).grid(row=2, column=1)
+            ent_MeseInitFiera = tk.Entry(db_param_frame_admin, textvariable=MeseInizioFiera_var).grid(row=2, column=2)
+            ent_AnnoInitFiera = tk.Entry(db_param_frame_admin, textvariable=AnnoInizioFiera_var).grid(row=2, column=3)
+
+            lbl_dataEndFiera = tk.Label(db_param_frame_admin, text="Inserire data fine fiera GG/MM/YYYY:").grid(row=3, column=0)
+            ent_GiornoEndFiera = tk.Entry(db_param_frame_admin, textvariable=GiornoFineFiera_var).grid(row=3, column=1)
+            ent_MeseEndFiera = tk.Entry(db_param_frame_admin, textvariable=MeseFineFiera_var).grid(row=3, column=2)
+            ent_AnnoEndFiera = tk.Entry(db_param_frame_admin, textvariable=AnnoFineFiera_var).grid(row=3, column=3)
+
+            btn_calcoloQuery = tk.Button(db_param_frame_admin, text="Inserisci Fiera", 
+                command=lambda : inserimento_Fiera(via_var.get(), numero_var.get(), city_var.get(), nazion_var.get(), fiera_var.get(), (GiornoInizioFiera_var.get(), MeseInizioFiera_var.get(), AnnoInizioFiera_var.get()), (GiornoFineFiera_var.get(), MeseFineFiera_var.get(), AnnoFineFiera_var.get()) ) ).grid(row=4, column=0)
+            
         elif(azione=="A2"):#Inserimento nuovo torneo
+            #INSERT INTO TORNEI (dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera)
             print()
         elif(azione=="A3"):#Inserimento dipendente
             print()
@@ -402,8 +455,6 @@ def genera_parametri(azione, ruolo):
 window_main.geometry(calcolo_dimensioni_finestra("inizio"))
 dimensioni_frame_tabella=calcolo_dimensioni_finestra("GUI principale")
 dimensioni_frame_tabella=dimensioni_frame_tabella.split("x")
-
-
 
 ##################################### FINESTRA LOG IN ####################################################
 

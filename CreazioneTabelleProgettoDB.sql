@@ -16,10 +16,10 @@ CREATE TABLE IF NOT EXISTS FIERE(
     via char(10),
     numeroCivico int,
     nomeFiera char(20) NOT NULL,
-    dataInzioFiera DATETIME NOT NULL,
+    dataInizioFiera DATETIME NOT NULL,
     dataFineFiera DATETIME NOT NULL,
-    IdNazione int NOT NULL,
-    IdCittà int NOT NULL,
+    IdNazione int,
+    IdCittà int,
     FOREIGN KEY (IdNazione) references CITTA,
     FOREIGN KEY (IdCittà) references CITTA
 );
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS VEN_MATERIALI(
 );
 
 CREATE TABLE IF NOT EXISTS SORVEGLIANO(
-    turnoDiLavoro DATETIME PRIMARY KEY,
+    turnoDiLavoro char(10) PRIMARY KEY,
     IdFiera int NOT NULL,
     CodiceBadge int NOT NULL,
     FOREIGN KEY (IdFiera) REFERENCES FIERA,
@@ -222,8 +222,8 @@ CREATE TABLE IF NOT EXISTS COMPOSTI(
 );
 
 CREATE TABLE IF NOT EXISTS SET_CARTE_BANDITE(
-    dataInizio INT NOT NULL,
-    dataFine INT NOT NULL,
+    dataInizio DATETIME NOT NULL,
+    dataFine DATETIME NOT NULL,
     codCarta INT NOT NULL,
     PRIMARY KEY (dataInizio, dataFine, codCarta)
     FOREIGN KEY (dataInizio) REFERENCES FORMATI,
