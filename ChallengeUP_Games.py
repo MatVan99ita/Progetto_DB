@@ -17,6 +17,7 @@ screen_height = window_main.winfo_screenheight()
 
 password_entry=tk.StringVar()
 name_entry=tk.StringVar()
+nomeFrame=Frame()
 
 dataTorneo=tk.StringVar()
 
@@ -25,7 +26,7 @@ connessione_DB.creazione_tabelle()
 conn=lite.connect("ChallengeUPGames_DB.db")
 cur=conn.cursor()
 
-def Admin_login(log):
+def Admin_login(log):#da perfezionare ma non indispensabile ai fini del programma
     if(log):
         print("si")#andranno mostrati i textbox per le credenziali e nascosto il tasto
         first_frame.pack_forget()
@@ -33,7 +34,6 @@ def Admin_login(log):
     else:
         #accesso utente senza log in e senza funzionalità aggiuntive
         program_start("user")
-    
 
 def calcolo_dimensioni_finestra(frame, alt=0, larg=0):
 
@@ -62,9 +62,6 @@ def calcolo_dimensioni_finestra(frame, alt=0, larg=0):
 
     return geometria
 
-
-nomeFrame=Frame()
-
 def program_start(tipologia_utente):
     
     if(tipologia_utente=="user"):
@@ -86,7 +83,6 @@ def program_start(tipologia_utente):
         #    print("errore user e/o password")
         #controllo sulle credenziali
 
-
 def genera_tabella_query(tipo, ris):
     total_rows=len(ris)
     total_columns=len(ris[0])
@@ -106,7 +102,6 @@ def genera_tabella_query(tipo, ris):
                 e.grid(row=i, column=j)
                 e.insert(ris[i][j], ris[i][j])
 
-
 def controlloData(giorno, mese, anno):
     g=len(giorno)
     m=len(mese)
@@ -124,8 +119,7 @@ def controlloData(giorno, mese, anno):
 
     #formattazione della data secondo i database
     return anno + "-" + mese + "-" + giorno
-    
-#U1
+
 def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
     if(controlloData(giorno, mese, anno) != 1):
         data=controlloData(giorno, mese, anno)
@@ -145,9 +139,9 @@ def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
         cursor=conn.cursor()
         cursor.execute(sql, data)
         records=cursor.fetchall()
-        v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
-        genera_tabella_query(ruolo, v)
-
+        tabella=colonne
+        tabella.append(records)
+        genera_tabella_query(ruolo, tabella)
 
 def top_giocatori(ruolo, IdGiocatore):
     sql=""" SELECT ( (SELECT SUM(punteggioVittoria)
@@ -165,9 +159,9 @@ def top_giocatori(ruolo, IdGiocatore):
     cursor=conn.cursor()
     cursor.execute(sql, IdGiocatore)
     records=cursor.fetchall()
-    v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
-    genera_tabella_query(ruolo, v)
-
+    tabella=colonne
+    tabella.append(records)
+    genera_tabella_query(ruolo, tabella)
 
 def lista_carte_bandite_formato(ruolo):
     sql=""" SELECT *
@@ -184,8 +178,9 @@ def lista_carte_bandite_formato(ruolo):
     records=cursor.fetchall()
     print(colonne)
     print(records)
-    v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
-    genera_tabella_query(ruolo, v)
+    tabella=colonne
+    tabella.append(records)
+    genera_tabella_query(ruolo, tabella)
 
 def lista_carte_mazzo(ruolo, mazzo):
     sql=""" SELECT codMazzo, colore_clan, codCarta, nome, tipo, descrizione, costoMana, attributo, attacco, difesa, effetto
@@ -201,8 +196,9 @@ def lista_carte_mazzo(ruolo, mazzo):
     records=cursor.fetchall()
     print(colonne)
     print(records)
-    v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
-    genera_tabella_query(ruolo, v)
+    tabella=colonne
+    tabella.append(records)
+    genera_tabella_query(ruolo, tabella)
 
 
 ######################################## FUNZIONI ADMIN ####################################################
@@ -220,13 +216,12 @@ def inserimento_Fiera(via, numeroCivico, IdCittà, IdNazione, nomeFiera, dataIni
         print(dataInizio)
         print(dataFine)
         cursor=conn.cursor()
-        dati=(via, numeroCivico, IdCittà, IdNazione, nomeFiera, dataInizio, dataFine)
+        dati=(via, numeroCivico, int(IdCittà), id(IdNazione), nomeFiera, dataInizio, dataFine)
         try:
             cursor.execute(sql, dati)
             conn.commit()
         except Error as e:
             msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera\n"+str(e))
-
 
 def inserimento_Torneo(dataTorneo, nomeTorneo, numeroSpettatori, numeroPatecipanti, IdFiera, codGioco):
     if(controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2]) != 1):
@@ -237,14 +232,13 @@ def inserimento_Torneo(dataTorneo, nomeTorneo, numeroSpettatori, numeroPatecipan
         sql=""" INSERT INTO TORNEI(dataTorneo, nomeTorneo, numeroSpettatori, numeroPartecipanti, IdFiera, codGioco) 
         VALUES((?), (?), (?), (?), (?), (?))"""
         
-        dati=(dataT, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codGioco)
+        dati=(dataT, nomeTorneo, int(numeroPatecipanti), int(numeroSpettatori), int(IdFiera), int(codGioco))
         cursor=conn.cursor()
         try:
             cursor.execute(sql, dati)
             conn.commit()
         except Error as e:
             msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento del torneo\n"+str(e))
-
 
 def gioco_partite_ufficiose():
     sql=""" SELECT TOP 1 WITH TIES nomeGioco, descrizione, regolamento, SUM(numeroPartite) AS partiteTotali
@@ -260,74 +254,84 @@ def gioco_partite_ufficiose():
     records=cursor.fetchall()
     print(colonne)
     print(records)
-    v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
-    genera_tabella_query("admin", v)
+    tabella=colonne
+    tabella.append(records)
+    genera_tabella_query("admin", tabella)
 
 def guadagni_stands():
-    sql=""" SELECT CodStand, SUM(prezzoTotale) AS guadagno
-            FROM VENDITE 
-            GROUP BY CodStand
-
-            """
+    sql=""" SELECT V.codStand, SUM(prezzoTotale) AS guadagnoTotale, 
+                (
+                    SELECT AVG(prezzoTotale) 
+                    FROM VENDITE V1, VEN_GIOCO VG 
+                    WHERE V1.codStand = VG.codStand AND V1.codVendita = VG.codVendita AND V1.codStand = V.codStand
+                ) AS guadagnoMedioGiochiDaTavolo,
+                (
+                    SELECT AVG(prezzoTotale) 
+                    FROM VENDITE V1, VEN_MAT VM 
+                    WHERE V1.codStand = VM.codStand AND V1.codVendita = VM.codVendita AND V1.codStand = V.codStand
+                ) AS guadagnoMedioMaterialiDaGioco
+            FROM VENDITE V
+            GROUP BY V.codStand
+        """
 
     colonne=["CodStand", "Guadagno"]
     cursor=conn.cursor()
     cursor.execute(sql)
     records=cursor.fetchall()
-    print(colonne)
-    print(records)
-    v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
-    genera_tabella_query("admin", v)
+    tabella=colonne
+    tabella.append(records)
+    genera_tabella_query("admin", tabella)
 
 def inserimento_Dipendente(nome, cognome, ruolo, dataNascita):
     if(controlloData(dataNascita[0], dataNascita[1], dataNascita[2]) != 1):
-        sql=""" INSERT INTO DIPENDENTI(dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera) 
-        VALUES((?), (?), (?), (?), (?), (?))"""
+        sql=""" INSERT INTO DIPENDENTI(nome, cognome, dataDiNascita, ruolo) 
+        VALUES((?), (?), (?), (?))"""
         
         dati=(nome, cognome, ruolo, dataNascita)
         cursor=conn.cursor()
         try:
             cursor.execute(sql, dati)
             conn.commit()
-        except:
-            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento del dipendente")
+        except Error as e:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento del dipendente\n"+str(e))
 
 def registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand, prezzoTotale, CODICE_PRODOTTO, quantità):
-    if(controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2]) != 1):
+    if(controlloData(dataVendita[0], dataVendita[1], dataVendita[2]) != 1):
         
         #formattazione delle date
-        dataT=controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2])
+        dataV=controlloData(dataVendita[0], dataVendita[1], dataVendita[2])
     
-        sql=""" INSERT INTO VENDITE(CodVendita, dataVendita, CodStand, prezzoTotale) VALUES((?), (?), (?), (?), (?))"""
-        dati=(codVendita, dataVendita, codStand, prezzoTotale)
+        sql=""" INSERT INTO VENDITE(CodVendita, dataVendita, codStand, prezzoTotale) 
+                    VALUES((?), (?), (?), (?))"""
+        dati=(int(codVendita), dataV, int(codStand), prezzoTotale)
         cursor=conn.cursor()
         try:
             cursor.execute(sql, dati)
             conn.commit()
-        except:
-            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della vendita")
+        except Error as e:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della vendita\n"+str(e))
 
 
         if(tipologia_prodotto=="Gioco da tavolo"):
-            sql="""INSERT INTO VEN_GIOCHI(CodVendita, CodGioco, CodStand, quantitàGiochiSelezionati) 
+            sql="""INSERT INTO VEN_GIOCHI(codVendita, codGioco, codStand, quantitàGiochiSelezionati) 
                         VALUES((?), (?), (?), (?))"""
             dati=(codVendita, CODICE_PRODOTTO, codStand, quantità)
             try:
                 cursor.execute(sql, dati)
                 conn.commit()
-            except:
-                msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della vendita")
+            except Error as e:
+                msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento dei giochi\n"+str(e))
         
         elif(tipologia_prodotto=="Materiale di gioco"):
             
-            sql="""INSERT INTO VEN_MATERIALI(CodVendita, CodMateriale, CodStand, quantitàMaterialiSelezionati) 
+            sql="""INSERT INTO VEN_MATERIALI(codVendita, codMateriale, codStand, quantitàMaterialiSelezionati) 
                         VALUES((?), (?), (?), (?));"""
             dati=(codVendita, CODICE_PRODOTTO, codStand, quantità)
             try:
                 cursor.execute(sql, dati)
                 conn.commit()
-            except:
-                msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
+            except Error as e:
+                msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento dei matriali di gioco\n"+str(e))
             
             sql="""UPDATE IMMAGAZZINATI SET quantitàMateriali = quantitàMateriali - quantitàMaterialiSelezionati 
                          WHERE CodGioco = (?) AND CodStand = (?)"""
@@ -335,28 +339,26 @@ def registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand
             try:
                 cursor.execute(sql, dati)
                 conn.commit()
-            except:
-                msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
-            
+            except Error as e:
+                msg.showerror(title="ERRORE AGGIORNAMENTO", message="qualcosa è andato storto con l'aggiornamento del magazzino\n"+str(e))
 
-
-def inserimento_Formato(dataTorneo, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera):
-    if(controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2]) != 1):
+def inserimento_Formato(dataInizio, dataFine, codGioco):
+    if(controlloData(dataInizio[0], dataInizio[1], dataInizio[2]) != 1 and controlloData(dataFine[0], dataFine[1], dataFine[2]) != 1):
         
         #formattazione delle date
-        dataT=controlloData(dataTorneo[0], dataTorneo[1], dataTorneo[2])
-    
-        sql=""" INSERT INTO TORNEI(dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera) 
-        VALUES((?), (?), (?), (?), (?), (?))"""
+        dataI=controlloData(dataInizio[0], dataInizio[1], dataInizio[2])
+        dataF=controlloData(dataFine[0], dataFine[1], dataFine[2])
+
+        sql=""" INSERT INTO FORMATI(dataInizio, dataFine, codGioco) 
+                VALUES((?), (?), (?))"""
         
-        dati=(dataT, nomeTorneo, numeroPatecipanti, numeroSpettatori, IdFiera, codFiera)
+        dati=(dataI, dataF, int(codGioco))
         cursor=conn.cursor()
         try:
             cursor.execute(sql, dati)
             conn.commit()
-        except:
-            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera")
-
+        except Error as e:
+            msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera\n"+str(e))
 
 def genera_parametri(azione, ruolo):
         nomeFrame=tk.Frame()
@@ -374,22 +376,24 @@ def genera_parametri(azione, ruolo):
             ent_mese = tk.Entry(nomeFrame, textvariable=mese_var).grid(row=0, column=2)
             ent_anno = tk.Entry(nomeFrame, textvariable=anno_var).grid(row=0, column=3)
             btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : lista_partite_effettuate_torneo(conn, giorno_var.get(), mese_var.get(), anno_var.get(), ruolo)).grid(row=1, column=0)
-        
-        #U2: Dato un concorrente ritornare il punteggio totale, numero vittorie e numero sconfitte per ogni torneo in cui ha partecipato
-        elif(azione=="U2"):
+
+        elif(azione=="U2"):#Dato un concorrente ritornare il punteggio totale, numero vittorie e numero sconfitte per ogni torneo in cui ha partecipato
             giocatore_var=tk.StringVar()
             lbl_IdGiocatore = tk.Label(nomeFrame, text="Inserire IdGiocatore:").grid(row=0, column=0)
             ent_Giocatore = tk.Entry(nomeFrame, textvariable=giocatore_var).grid(row=0, column=1)
             btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : top_giocatori(ruolo, giocatore_var.get())).grid(row=1, column=0)
         
-        #elif(azione=="U3"):#Lista delle carte bandite dall'attuale formato
-        #questa richiede solo la data attuale presa direttamente da sistema
-
+        elif(azione=="U3"):#Lista delle carte bandite dall'attuale formato
+            #questa richiede solo la data attuale presa direttamente da sistema
+            print()
+        
         elif(azione=="U4"):#Lista delle carte di un mazzo specificato
             mazzo_var=tk.StringVar()
             lbl_Mazzo = tk.Label(nomeFrame, text="Inserire codice mazzo:").grid(row=0, column=0)
             ent_Mazzo = tk.Entry(nomeFrame, textvariable=mazzo_var).grid(row=0, column=1)
             btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : lista_carte_mazzo(ruolo, mazzo_var.get())).grid(row=1, column=0)
+
+        ################################ INSERIMENTO DATI ##################################################
 
         elif(azione=="A1"):#Inserimento nuova fiera
             #INSERT INTO FIERE (via, numeroCivico, IDcittà, IDnazione, nomeFiera, dataInizioFiera, dataFineFiera) 
@@ -436,20 +440,154 @@ def genera_parametri(azione, ruolo):
                 command=lambda : inserimento_Fiera(via_var.get(), numero_var.get(), city_var.get(), nazion_var.get(), fiera_var.get(), (GiornoInizioFiera_var.get(), MeseInizioFiera_var.get(), AnnoInizioFiera_var.get()), (GiornoFineFiera_var.get(), MeseFineFiera_var.get(), AnnoFineFiera_var.get()) ) ).grid(row=4, column=0)
             
         elif(azione=="A2"):#Inserimento nuovo torneo
-            #INSERT INTO TORNEI (dataTorneo, nomeTorneo, numeroPartecipanti, numeroSpettatori, IdFiera, CodFiera)
-            print()
+            torneo_var=tk.StringVar()
+            partecipanti_var=tk.StringVar()
+            spettatori_var=tk.StringVar()
+            fiera_var=tk.StringVar()
+            gioco_var=tk.StringVar()
+        
+            GiornoTorneo_var=tk.StringVar()
+            MeseTorneo_var=tk.StringVar()
+            AnnoTorneo_var=tk.StringVar()
+
+
+            lbl_torneo = tk.Label(db_param_frame_admin, text="Inserire nome del torneo:").grid(row=0, column=0)
+            ent_torneo = tk.Entry(db_param_frame_admin, textvariable=torneo_var).grid(row=0, column=1)
+
+            lbl_part = tk.Label(db_param_frame_admin, text="Inserire numero spettatori:").grid(row=0, column=2)
+            ent_part = tk.Entry(db_param_frame_admin, textvariable=partecipanti_var).grid(row=0, column=3)
+
+            lbl_spett = tk.Label(db_param_frame_admin, text="Inserire numeroPartecipanti:").grid(row=1, column=0)
+            ent_spett = tk.Entry(db_param_frame_admin, textvariable=spettatori_var).grid(row=1, column=1)
+
+            lbl_gioco = tk.Label(db_param_frame_admin, text="Inserire codice gioco:").grid(row=1, column=2)
+            ent_gioco = tk.Entry(db_param_frame_admin, textvariable=gioco_var).grid(row=1, column=3)
+
+            lbl_fiera = tk.Label(db_param_frame_admin, text="Inserire codice fiera:").grid(row=1, column=4)
+            ent_fiera = tk.Entry(db_param_frame_admin, textvariable=fiera_var).grid(row=1, column=5)
+
+            lbl_dataTorneo = tk.Label(db_param_frame_admin, text="Inserire data del torneo GG/MM/YYYY:").grid(row=2, column=0)
+            ent_GiornoTorneo = tk.Entry(db_param_frame_admin, textvariable=GiornoTorneo_var).grid(row=2, column=1)
+            ent_MeseTorneo = tk.Entry(db_param_frame_admin, textvariable=MeseTorneo_var).grid(row=2, column=2)
+            ent_AnnoTorneo = tk.Entry(db_param_frame_admin, textvariable=AnnoTorneo_var).grid(row=2, column=3)
+
+            btn_calcoloQuery = tk.Button(db_param_frame_admin, text="Inserisci Torneo", 
+                command=lambda : inserimento_Fiera( (GiornoTorneo_var.get(), MeseTorneo_var.get(), AnnoTorneo_var.get()), torneo_var.get(), int(spettatori_var.get()), int(partecipanti_var.get()), fiera_var.get(), gioco_var.get() ) ).grid(row=3, column=0)
+        
         elif(azione=="A3"):#Inserimento dipendente
-            print()
+
+            nome_var=tk.StringVar()
+            cognome_var=tk.StringVar()
+            ruolo_var=tk.StringVar()
+        
+            Giorno_var=tk.StringVar()
+            Mese_var=tk.StringVar()
+            Anno_var=tk.StringVar()
+
+            ruolo=["Giudice", "Addetto sicurezza", "Addetto receptionist", "Negoziante"]
+            ruolo_var.set(ruolo)
+
+            lbl_nome = tk.Label(db_param_frame_admin, text="Inserire nome del torneo:").grid(row=0, column=0)
+            ent_nome = tk.Entry(db_param_frame_admin, textvariable=nome_var).grid(row=0, column=1)
+
+            lbl_cognome = tk.Label(db_param_frame_admin, text="Inserire numero spettatori:").grid(row=0, column=2)
+            ent_cognome = tk.Entry(db_param_frame_admin, textvariable=cognome_var).grid(row=0, column=3)
+
+            lbl_ruolo = tk.Label(db_param_frame_admin, text="Inserire numeroPartecipanti:").grid(row=1, column=0)
+            ent_ruolo = OptionMenu(db_param_frame_admin, ruolo_var, *ruolo).grid(row=1, column=1)#menù a tendina
+
+            lbl_dataTorneo = tk.Label(db_param_frame_admin, text="Inserire data del torneo GG/MM/YYYY:").grid(row=2, column=0)
+            ent_GiornoTorneo = tk.Entry(db_param_frame_admin, textvariable=Giorno_var).grid(row=2, column=1)
+            ent_MeseTorneo = tk.Entry(db_param_frame_admin, textvariable=Mese_var).grid(row=2, column=2)
+            ent_AnnoTorneo = tk.Entry(db_param_frame_admin, textvariable=Anno_var).grid(row=2, column=3)
+
+            #inserimento_Dipendente(nome, cognome, ruolo, dataNascita):
+            #sql=""" INSERT INTO DIPENDENTI(nome, cognome, dataDiNascita, ruolo) 
+            btn_calcoloQuery = tk.Button(db_param_frame_admin, text="Inserisci Torneo", 
+                command=lambda : inserimento_Dipendente(nome_var.get(), cognome_var.get(), (Giorno_var.get(), Mese_var.get(), Anno_var.get()), ruolo_var.get() ) ).grid(row=3, column=0)
+        
         elif(azione=="A4"):#Inserimento nuovo formato
-            print()
-        elif(azione=="A5"):#Gioco da tavolo con più partite non ufficiali
-            print()
-        elif(azione=="A6"):#Il gioco più venduto per ogni stand
-            print()
+            #inserimento_Formato(dataInizio, dataFine, codGioco):
+            
+            gioco_var=tk.StringVar()
+
+            GiornoInizio_var=tk.StringVar()
+            MeseInizio_var=tk.StringVar()
+            AnnoInizio_var=tk.StringVar()
+
+            GiornoFine_var=tk.StringVar()
+            MeseFine_var=tk.StringVar()
+            AnnoFine_var=tk.StringVar()
+
+            lbl_dataInizio = tk.Label(db_param_frame_admin, text="Inserire data di inizio del formato GG/MM/YYYY:").grid(row=0, column=0)
+            ent_GiornoInizio = tk.Entry(db_param_frame_admin, textvariable=GiornoInizio_var).grid(row=0, column=1)
+            ent_MeseInizio = tk.Entry(db_param_frame_admin, textvariable=MeseInizio_var).grid(row=0, column=2)
+            ent_AnnoInizio = tk.Entry(db_param_frame_admin, textvariable=AnnoInizio_var).grid(row=0, column=3)
+
+            lbl_dataFine = tk.Label(db_param_frame_admin, text="Inserire data di fine del formato GG/MM/YYYY:").grid(row=1, column=0)
+            ent_GiornoFine = tk.Entry(db_param_frame_admin, textvariable=GiornoFine_var).grid(row=1, column=1)
+            ent_MeseFine = tk.Entry(db_param_frame_admin, textvariable=MeseFine_var).grid(row=1, column=2)
+            ent_AnnoFine = tk.Entry(db_param_frame_admin, textvariable=AnnoFine_var).grid(row=1, column=3)
+
+            lbl_gioco = tk.Label(db_param_frame_admin, text="Inserire codice gioco a cui corrisponde il formato:").grid(row=2, column=0)
+            ent_gioco = tk.Entry(db_param_frame_admin, textvariable=gioco_var).grid(row=2, column=1)
+            #inserimento_Dipendente(nome, cognome, ruolo, dataNascita):
+            #sql=""" INSERT INTO DIPENDENTI(nome, cognome, dataDiNascita, ruolo) 
+
+            btn_calcoloQuery = tk.Button(db_param_frame_admin, text="Inserisci Formato", 
+                command=lambda : inserimento_Formato( (GiornoInizio_var.get(), MeseInizio_var.get(), AnnoInizio_var.get()), (GiornoFine_var.get(), MeseFine_var.get(), AnnoFine_var.get()), gioco_var.get() ) ).grid(row=3, column=0)
+        
         elif(azione=="A7"):#Registrazione vendita per stand
-            print()
+            #registro_vendite_stand(tipologia_prodotto, codVendita, dataVendita, codStand, prezzoTotale, CODICE_PRODOTTO, quantità)
+            
+            tipologia=["Gioco da tavolo", "Materiale di gioco"]
+            tipo_var=tk.StringVar()
+            vendita_var=tk.StringVar()
+            stand_var=tk.StringVar()
+            prezzo_var=tk.StringVar()
+            codiceProdotto_var=tk.StringVar()
+            quantity_var=tk.StringVar()
+
+            GiornoVendita_var=tk.StringVar()
+            MeseVendita_var=tk.StringVar()
+            AnnoVendita_var=tk.StringVar()
+
+            tipo_var.set(tipologia[0])#valore di partenza
+            lbl_tipo = tk.Label(db_param_frame_admin, text="Scegliere tipo di prodotto:").grid(row=0, column=0)
+            menu_tipo = OptionMenu(db_param_frame_admin, tipo_var, *tipologia).grid(row=0, column=1)#menù a tendina
+
+            lbl_vendita = tk.Label(db_param_frame_admin, text="Inserire codice vendita:").grid(row=1, column=0)
+            ent_vendita = tk.Entry(db_param_frame_admin, textvariable=vendita_var).grid(row=1, column=1)
+
+            lbl_stand = tk.Label(db_param_frame_admin, text="Inserire codice dello stand:").grid(row=1, column=2)
+            ent_stand = tk.Entry(db_param_frame_admin, textvariable=stand_var).grid(row=1, column=3)
+
+            lbl_prezzo = tk.Label(db_param_frame_admin, text="Inserire prezzo del prodotto:").grid(row=2, column=0)
+            ent_prezzo = tk.Entry(db_param_frame_admin, textvariable=prezzo_var).grid(row=2, column=1)
+
+            lbl_prodotto = tk.Label(db_param_frame_admin, text="Inserire codice del prodotto:").grid(row=2, column=2)
+            ent_prodotto = tk.Entry(db_param_frame_admin, textvariable=codiceProdotto_var).grid(row=2, column=3)
+
+            lbl_quantity = tk.Label(db_param_frame_admin, text="Inserire quantità:").grid(row=2, column=4)
+            ent_quantity = tk.Entry(db_param_frame_admin, textvariable=quantity_var).grid(row=2, column=5)
+
+            lbl_dataFine = tk.Label(db_param_frame_admin, text="Inserire data di fine del formato GG/MM/YYYY:").grid(row=3, column=0)
+            ent_GiornoFine = tk.Entry(db_param_frame_admin, textvariable=GiornoVendita_var).grid(row=3, column=1)
+            ent_MeseFine = tk.Entry(db_param_frame_admin, textvariable=MeseVendita_var).grid(row=3, column=2)
+            ent_AnnoFine = tk.Entry(db_param_frame_admin, textvariable=AnnoVendita_var).grid(row=3, column=3)
+
+            btn_calcoloQuery = tk.Button(db_param_frame_admin, text="Inserisci scontrino", 
+                command=lambda : registro_vendite_stand(tipo_var.get(), vendita_var.get(), (GiornoVendita_var.get().get(), MeseVendita_var, AnnoVendita_var.get()), stand_var.get(), prezzo_var.get(), codiceProdotto_var.get(), quantity_var.get()) ).grid(row=3, column=0)
+                #tipologia_prodotto, codVendita, dataVendita, codStand, prezzoTotale, CODICE_PRODOTTO, quantità)
+
+
+        ################################ RICERCHE PER ADMIN ##################################################
+        
+        elif(azione=="A5"):#Gioco da tavolo con più partite non ufficiali
+            gioco_partite_ufficiose()
+        
         elif(azione=="A8"):#Guadagno di ogni stand
-            print()
+            guadagni_stands()
 
 
 window_main.geometry(calcolo_dimensioni_finestra("inizio"))
@@ -506,9 +644,9 @@ top_left_frame = tk.Frame(top_frame, highlightbackground="green", highlightcolor
 
 
 btn_U1=tk.Button(top_left_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U1", "user")).grid(row=0, column=0)
-btn_U2=tk.Button(top_left_frame, text="Top 10 giocatori con il punteggio più alto", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=1, column=0)
-btn_U3=tk.Button(top_left_frame, text="Lista delle carte bandite dall'attuale formato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=2, column=0)
-btn_U4=tk.Button(top_left_frame, text="Lista delle carte di un mazzo specificato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=3, column=0)
+btn_U2=tk.Button(top_left_frame, text="Top 10 giocatori con il punteggio più alto", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U2", "user")).grid(row=1, column=0)
+btn_U3=tk.Button(top_left_frame, text="Lista delle carte bandite dall'attuale formato", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U3", "user")).grid(row=2, column=0)
+btn_U4=tk.Button(top_left_frame, text="Lista delle carte di un mazzo specificato", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U4", "user")).grid(row=3, column=0)
 
 top_left_frame.pack(side=tk.LEFT)
 
@@ -542,18 +680,17 @@ lbl_line = tk.Label(admin_frame, text="*****************************************
 #####################################
 final_frame = tk.Frame(admin_frame)
 btn_U1_admin=tk.Button(final_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U1", "admin")).grid(row=0, column=0)
-btn_U2_admin=tk.Button(final_frame, text="Top 10 giocatori con il punteggio più alto", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=1, column=0)
-btn_U3_admin=tk.Button(final_frame, text="Lista delle carte bandite dall'attuale formato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=2, column=0)
-btn_U4_admin=tk.Button(final_frame, text="Lista delle carte di un mazzo specificato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=3, column=0)
+btn_U2_admin=tk.Button(final_frame, text="Top 10 giocatori con il punteggio più alto", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U2", "admin")).grid(row=1, column=0)
+btn_U3_admin=tk.Button(final_frame, text="Lista delle carte bandite dall'attuale formato", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U3", "admin")).grid(row=2, column=0)
+btn_U4_admin=tk.Button(final_frame, text="Lista delle carte di un mazzo specificato", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U4", "admin")).grid(row=3, column=0)
 
-btn_A1=tk.Button(final_frame, text="Inserimento nuova fiera", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=5, column=0)
-btn_A2=tk.Button(final_frame, text="Inserimento nuovo torneo", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=6, column=0)
-btn_A3=tk.Button(final_frame, text="Inserimento dipendente", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=7, column=0)
-btn_A4=tk.Button(final_frame, text="Inserimento nuovo formato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=8, column=0)
-btn_A5=tk.Button(final_frame, text="Gioco da tavolo con più partite non ufficiali", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=9, column=0)
-btn_A6=tk.Button(final_frame, text="Il gioco più venduto per ogni stand", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=10, column=0)
-btn_A7=tk.Button(final_frame, text="Registrazione vendita per stand", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=11, column=0)
-btn_A8=tk.Button(final_frame, text="Guadagno di ogni stand", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=11, column=0)
+btn_A1=tk.Button(final_frame, text="Inserimento nuova fiera", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("A1", "admin")).grid(row=5, column=0)
+btn_A2=tk.Button(final_frame, text="Inserimento nuovo torneo", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("A2", "admin")).grid(row=6, column=0)
+btn_A3=tk.Button(final_frame, text="Inserimento dipendente", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("A3", "admin")).grid(row=7, column=0)
+btn_A4=tk.Button(final_frame, text="Inserimento nuovo formato", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("A4", "admin")).grid(row=8, column=0)
+btn_A5=tk.Button(final_frame, text="Gioco da tavolo con più partite non ufficiali", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("A5", "admin")).grid(row=9, column=0)
+btn_A7=tk.Button(final_frame, text="Registrazione vendita per stand", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("A7", "admin")).grid(row=10, column=0)
+btn_A8=tk.Button(final_frame, text="Guadagni di ogni stand", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("A8", "admin")).grid(row=11, column=0)
 
 
 final_frame.pack(side=tk.LEFT)

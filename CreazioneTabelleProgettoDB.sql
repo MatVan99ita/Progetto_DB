@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS FIERE(
 CREATE TABLE IF NOT EXISTS VENDITE(
     CodVendita int NOT NULL,
     dataVendita DATETIME NOT NULL,
-    IdStand int NOT NULL,
+    codStand int NOT NULL,
     prezzoTotale MONEY NOT NULL,
     PRIMARY KEY (CodVendita, IdStand),
     FOREIGN KEY (IdStand) REFERENCES STANDS
