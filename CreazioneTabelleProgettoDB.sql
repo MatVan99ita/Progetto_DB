@@ -26,12 +26,10 @@ CREATE TABLE IF NOT EXISTS FIERE(
 
 CREATE TABLE IF NOT EXISTS VENDITE(
     CodVendita int NOT NULL,
-    prodotto char(20) NOT NULL,
-    quantità int NOT NULL,
     dataVendita DATETIME NOT NULL,
-    prezzoVendita MONEY NOT NULL,
     IdStand int NOT NULL,
-    PRIMARY KEY (CodVendita, prodotto, quantità),
+    prezzoTotale MONEY NOT NULL,
+    PRIMARY KEY (CodVendita, IdStand),
     FOREIGN KEY (IdStand) REFERENCES STANDS
 );
 
@@ -72,7 +70,6 @@ CREATE TABLE IF NOT EXISTS GIOCHI_DA_TAVOLO(
 CREATE TABLE IF NOT EXISTS FORMATI(
     dataInizio DATETIME NOT NULL,
     dataFine DATETIME NOT NULL,
-    listaCarteBandite varchar(1000) NOT NULL,
     codGioco int NOT NULL,
     PRIMARY KEY (dataInizio, dataFine),
     FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO
@@ -101,6 +98,28 @@ CREATE TABLE IF NOT EXISTS TORNEI(
     IdFiera int NOT NULL,
     FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO,
     FOREIGN KEY (IdFiera) REFERENCES FIERA
+);
+
+CREATE TABLE IF NOT EXISTS VEN_GIOCHI(
+    codGioco int NOT NULL,
+    codStand int NOT NULL,
+    codVendita int NOT NULL,
+    quantitàGiochiSelezionati int NOT NULL,
+    PRIMARY KEY (codGioco, codStand, codVendita),
+    FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO,
+    FOREIGN KEY (codStand) REFERENCES STANDS,
+    FOREIGN KEY (codVendita) REFERENCES VENDITE
+);
+
+CREATE TABLE IF NOT EXISTS VEN_MATERIALI(
+    codMateriale int NOT NULL,
+    codStand int NOT NULL,
+    codVendita int NOT NULL,
+    quantitàMaterialiSelezionati int NOT NULL,
+    PRIMARY KEY (codMateriale, codStand, codVendita),
+    FOREIGN KEY (codMateriale) REFERENCES GIOCHI_DA_TAVOLO,
+    FOREIGN KEY (codStand) REFERENCES STANDS,
+    FOREIGN KEY (codVendita) REFERENCES VENDITE
 );
 
 CREATE TABLE IF NOT EXISTS SORVEGLIANO(
@@ -163,6 +182,7 @@ CREATE TABLE IF NOT EXISTS PARTITE_UFFICIALI(
 CREATE TABLE IF NOT EXISTS VINCITORI(
     IdMatch INT NOT NULL,
     codConcorrente INT NOT NULL,
+    punteggioVittoria INT NOT NULL CHECK(punteggioVittoria>=0),
     PRIMARY KEY (IdMatch, codConcorrente),
     FOREIGN KEY (IdMatch) REFERENCES PARTITE_UFFICIALI,
     FOREIGN KEY (codConcorrente) REFERENCES CONCORRENTI
@@ -171,6 +191,7 @@ CREATE TABLE IF NOT EXISTS VINCITORI(
 CREATE TABLE IF NOT EXISTS PERDENTI(
     IdMatch INT NOT NULL,
     codConcorrente INT NOT NULL,
+    punteggioSconfitta INT NOT NULL CHECK(punteggioSconfitta>=0),
     PRIMARY KEY (IdMatch, codConcorrente),
     FOREIGN KEY (IdMatch) REFERENCES PARTITE_UFFICIALI,
     FOREIGN KEY (codConcorrente) REFERENCES CONCORRENTI
@@ -178,6 +199,9 @@ CREATE TABLE IF NOT EXISTS PERDENTI(
 
 CREATE TABLE IF NOT EXISTS CONCORRENTI(
     codConcorrente int PRIMARY KEY,
+    nome char(50) NOT NULL,
+    cognome char(50) NOT NULL,
+    dataDiNascita DATETIME NOT NULL,
     punteggio int
 );
 
@@ -210,7 +234,7 @@ CREATE TABLE IF NOT EXISTS SET_CARTE_BANDITE(
 CREATE TABLE IF NOT EXISTS CARTE(
     codCarta int PRIMARY KEY,
     nome char(50) NOT NULL,
-    tipo char(10) NOT NULL CHECK(tipo = 'Mostro' OR tipo='Magia' OR tipo='Trappola'),
+    tipo char(10) NOT NULL CHECK(tipo = 'Mostro' OR tipo = 'Magia' OR tipo = 'Trappola'),
     descrizione char(100),
     costoMana int,
     attributo char(10),

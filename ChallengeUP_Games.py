@@ -120,8 +120,8 @@ def controlloData(giorno, mese, anno):
 
     return 0
     
-
-def lista_partite_effettuate_torneo(conn, giorno, mese, anno):
+#U1
+def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
     if(controlloData(giorno, mese, anno)==0):
         data=str(anno)+"-"+str(mese)+"-"+str(giorno)
 
@@ -136,32 +136,100 @@ def lista_partite_effettuate_torneo(conn, giorno, mese, anno):
             V.codConcorrente = C. codConcorrente AND
             T.dataTorneo=%s;""" % data
 
+        colonne=["IdTorneo","nomeTorneo", "numeroSpettatori", "numeroPartecipanti", "codGioco", "IdFiera", "IdMatch", "dataPartita", "nomePadiglione", ]
         cursor=conn.cursor()
         cursor.execute(sql)
         records=cursor.fetchall()
         v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
-        genera_tabella_query("user", v)
+        genera_tabella_query(ruolo, v)
 
 
-def genera_parametri(azione):
-    
+def top_giocatori(ruolo, IdGiocatore):
+    sql=""" SELECT ( (SELECT SUM(punteggioVittoria)
+        FROM )) + ()) AS punteggio totale, COUNT(punteggioVittoria) AS numeroVittorie, COUNT(punteggioSconfitte) AS numeroSconfitte
+        FROM TORNEI T, PARTITE_UFFICIALI PU, VINCITORE V, PERDENTE P, CONCORRENTE C
+        WHERE PU.IdTorneo = T.IdTorneo AND
+        V.IdMatch = PU.IdMatch AND
+        P.IdMatch = PU.IdMatch AND
+        C.codConcorrente = V.codConcorrente AND
+        C.codConcorrente = P.codConcorrente AND
+        CodConcorrente = %d
+        GROUP BY IdTorneo;""" % IdGiocatore
+
+    colonne=["IdGiocatore", "Punteggio totale"]
+    cursor=conn.cursor()
+    cursor.execute(sql)
+    records=cursor.fetchall()
+    v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+    genera_tabella_query(ruolo, v)
+
+
+def lista_carte_bandite_formato(ruolo):
+    sql=""" SELECT *
+            FROM SET_CARTE_BANDITE S, FORMATI F
+            WHERE F.dataInizio = S.dataInizio AND
+            F.dataFine = S.dataFine AND
+            dataInizio <= NOW() AND
+            dataFine > NOW()"""
+
+
+    colonne=["Data inizio", "Data Fine", "codCarta"]
+    cursor=conn.cursor()
+    cursor.execute(sql)
+    records=cursor.fetchall()
+    print(colonne)
+    print(records)
+    v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+    genera_tabella_query(ruolo, v)
+
+def lista_carte_mazzo(ruolo, mazzo):
+    sql=""" SELECT codMazzo, colore_clan, codCarta, nome, tipo, descrizione, costoMana, attributo, attacco, difesa, effetto
+            FROM MAZZI M, CARTE C, COMPOSTI CO
+            WHERE CO.codiceMazzo = M.codiceMazzo AND
+            C.codCarta = CO.codCarta AND
+            codiceMazzo = %d
+            """ % mazzo
+
+    colonne=["codMazzo", "Colore", "codCarta", "nome", "tipo", "descrizione", "Costo", "Attributo", "Attacco", "Difesa", "Effetto"]
+    cursor=conn.cursor()
+    cursor.execute(sql)
+    records=cursor.fetchall()
+    print(colonne)
+    print(records)
+    v=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+    genera_tabella_query(ruolo, v)
+
+def genera_parametri(azione, ruolo):
+        nomeFrame=tk.Frame()
+        if(ruolo=="user"):
+            nomeFrame=db_param_frame_user
+        else:
+            nomeFrame=db_param_frame_admin
     
         if(azione=="U1"):#Lista delle partite effettuate in un torneo svolto in una data specificata
             giorno_var=tk.StringVar()
             mese_var=tk.StringVar()
             anno_var=tk.StringVar()
-            lbl_dataTorneo = tk.Label(db_param_frame_user, text="Inserire data GIORNO(gg)/MESE(mm)/ANNO(yyyy)").grid(row=0, column=0)
-            ent_giorno = tk.Entry(db_param_frame_user, textvariable=giorno_var).grid(row=0, column=1)
-            ent_mese = tk.Entry(db_param_frame_user, textvariable=mese_var).grid(row=0, column=2)
-            ent_anno = tk.Entry(db_param_frame_user, textvariable=anno_var).grid(row=0, column=3)
-            btn_calcoloQuery = tk.Button(db_param_frame_user, text="Controlla", command=lambda : lista_partite_effettuate_torneo(conn, giorno_var.get(), mese_var.get(), anno_var.get())).grid(row=1, column=0)
+            lbl_dataTorneo = tk.Label(nomeFrame, text="Inserire data GIORNO(gg)/MESE(mm)/ANNO(yyyy)").grid(row=0, column=0)
+            ent_giorno = tk.Entry(nomeFrame, textvariable=giorno_var).grid(row=0, column=1)
+            ent_mese = tk.Entry(nomeFrame, textvariable=mese_var).grid(row=0, column=2)
+            ent_anno = tk.Entry(nomeFrame, textvariable=anno_var).grid(row=0, column=3)
+            btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : lista_partite_effettuate_torneo(conn, giorno_var.get(), mese_var.get(), anno_var.get(), ruolo)).grid(row=1, column=0)
         
-        #U2: Top 10 giocatori con il punteggio più alto
-
-        elif(azione=="U3"):#Lista delle carte bandite dall'attuale formato
-            print()
+        #U2: Dato un concorrente ritornare il punteggio totale, numero vittorie e numero sconfitte per ogni torneo in cui ha partecipato
+        elif(azione=="U2"):
+            giocatore_var=tk.StringVar()
+            lbl_IdGiocatore = tk.Label(nomeFrame, text="Inserire IdGiocatore:").grid(row=0, column=0)
+            ent_Giocatore = tk.Entry(nomeFrame, textvariable=giocatore_var).grid(row=0, column=1)
+            btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : top_giocatori(ruolo, giocatore_var.get())).grid(row=1, column=0)
+        
+        #elif(azione=="U3"):#Lista delle carte bandite dall'attuale formato
         elif(azione=="U4"):#Lista delle carte di un mazzo specificato
-            print()
+            mazzo_var=tk.StringVar()
+            lbl_Mazzo = tk.Label(nomeFrame, text="Inserire codice mazzo:").grid(row=0, column=0)
+            ent_Mazzo = tk.Entry(nomeFrame, textvariable=mazzo_var).grid(row=0, column=1)
+            btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : lista_carte_mazzo(ruolo, mazzo_var.get())).grid(row=1, column=0)
+        
         elif(azione=="A1"):#
             print()
         elif(azione=="A2"):#
@@ -233,7 +301,7 @@ top_left_frame = tk.Frame(top_frame, highlightbackground="green", highlightcolor
 
 
 
-btn_U1=tk.Button(top_left_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U1")).grid(row=0, column=0)
+btn_U1=tk.Button(top_left_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U1", "user")).grid(row=0, column=0)
 btn_U2=tk.Button(top_left_frame, text="Top 10 giocatori con il punteggio più alto", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=1, column=0)
 btn_U3=tk.Button(top_left_frame, text="Lista delle carte bandite dall'attuale formato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=2, column=0)
 btn_U4=tk.Button(top_left_frame, text="Lista delle carte di un mazzo specificato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=3, column=0)
@@ -269,7 +337,7 @@ lbl_line = tk.Label(admin_frame, text="*****************************************
 
 #####################################
 final_frame = tk.Frame(admin_frame)
-btn_U1_admin=tk.Button(final_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=0, column=0)
+btn_U1_admin=tk.Button(final_frame, text="Lista delle partite effettuate in un torneo svolto in una data specificata", highlightbackground="green", highlightcolor="green", highlightthickness=1, command=lambda: genera_parametri("U1", "admin")).grid(row=0, column=0)
 btn_U2_admin=tk.Button(final_frame, text="Top 10 giocatori con il punteggio più alto", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=1, column=0)
 btn_U3_admin=tk.Button(final_frame, text="Lista delle carte bandite dall'attuale formato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=2, column=0)
 btn_U4_admin=tk.Button(final_frame, text="Lista delle carte di un mazzo specificato", highlightbackground="green", highlightcolor="green", highlightthickness=1).grid(row=3, column=0)
