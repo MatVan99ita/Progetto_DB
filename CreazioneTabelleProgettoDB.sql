@@ -27,14 +27,14 @@ CREATE TABLE IF NOT EXISTS FIERE(
 CREATE TABLE IF NOT EXISTS VENDITE(
     CodVendita int NOT NULL,
     dataVendita DATETIME NOT NULL,
-    IdStand int NOT NULL,
+    codStand int NOT NULL,
     prezzoTotale MONEY NOT NULL,
-    PRIMARY KEY (CodVendita, IdStand),
-    FOREIGN KEY (IdStand) REFERENCES STANDS
+    PRIMARY KEY (CodVendita, codStand),
+    FOREIGN KEY (codStand) REFERENCES STANDS
 );
 
 CREATE TABLE IF NOT EXISTS STANDS(
-    IdStand int PRIMARY KEY,
+    codStand int PRIMARY KEY,
     nome char(10) NOT NULL,
     IdFiera int NOT NULL,
     CodiceBadge int NOT NULL,
@@ -44,19 +44,19 @@ CREATE TABLE IF NOT EXISTS STANDS(
 
 CREATE TABLE IF NOT EXISTS CONTENUTI(
     quantitàGiochi int NOT NULL,
-    IdStand INT NOT NULL,
+    codStand INT NOT NULL,
     codGioco INT NOT NULL,
-    PRIMARY KEY(IdStand, codGioco),
-    FOREIGN KEY (IdStand) REFERENCES STAND,
+    PRIMARY KEY(codStand, codGioco),
+    FOREIGN KEY (codStand) REFERENCES STAND,
     FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO
 );
 
 CREATE TABLE IF NOT EXISTS IMMAGAZZINATI(
     quantitàMateriale int NOT NULL,
-    IdStand INT NOT NULL,
+    codStand INT NOT NULL,
     codMateriale INT NOT NULL,
-    PRIMARY KEY (IdStand, codMateriale),
-    FOREIGN KEY (IdStand) REFERENCES STAND,
+    PRIMARY KEY (codStand, codMateriale),
+    FOREIGN KEY (codStand) REFERENCES STAND,
     FOREIGN KEY (codMateriale) REFERENCES MATERIALI_DA_GIOCO
 );
 
@@ -102,23 +102,23 @@ CREATE TABLE IF NOT EXISTS TORNEI(
 
 CREATE TABLE IF NOT EXISTS VEN_GIOCHI(
     codGioco int NOT NULL,
-    IdStand int NOT NULL,
+    codStand int NOT NULL,
     codVendita int NOT NULL,
     quantitàGiochiSelezionati int NOT NULL,
-    PRIMARY KEY (codGioco, IdStand, codVendita),
+    PRIMARY KEY (codGioco, codStand, codVendita),
     FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO,
-    FOREIGN KEY (IdStand) REFERENCES STANDS,
+    FOREIGN KEY (codStand) REFERENCES STANDS,
     FOREIGN KEY (codVendita) REFERENCES VENDITE
 );
 
 CREATE TABLE IF NOT EXISTS VEN_MATERIALI(
     codMateriale int NOT NULL,
-    IdStand int NOT NULL,
+    codStand int NOT NULL,
     codVendita int NOT NULL,
     quantitàMaterialiSelezionati int NOT NULL,
-    PRIMARY KEY (codMateriale, IdStand, codVendita),
+    PRIMARY KEY (codMateriale, codStand, codVendita),
     FOREIGN KEY (codMateriale) REFERENCES GIOCHI_DA_TAVOLO,
-    FOREIGN KEY (IdStand) REFERENCES STANDS,
+    FOREIGN KEY (codStand) REFERENCES STANDS,
     FOREIGN KEY (codVendita) REFERENCES VENDITE
 );
 
