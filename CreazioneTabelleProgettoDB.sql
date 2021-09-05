@@ -1,18 +1,18 @@
 
 CREATE TABLE IF NOT EXISTS NAZIONI(
-    IdNazione int PRIMARY KEY,
+    IdNazione int PRIMARY KEY AUTO_INCREMENT,
     nomeNazione char(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS CITTA(
-    IdCittà int PRIMARY KEY,
+    IdCittà int PRIMARY KEY AUTO_INCREMENT,
     nomeCittà char(60) NOT NULL,
     IdNazione INT NOT NULL, 
   	FOREIGN KEY (IdNazione) REFERENCES NAZIONI
 );
 
 CREATE TABLE IF NOT EXISTS FIERE(
-    IdFiera int PRIMARY KEY,
+    IdFiera int PRIMARY KEY AUTO_INCREMENT,
     via char(10),
     numeroCivico int,
     nomeFiera char(20) NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS VENDITE(
 );
 
 CREATE TABLE IF NOT EXISTS STANDS(
-    codStand int PRIMARY KEY,
+    codStand int PRIMARY KEY AUTO_INCREMENT,
     nome char(10) NOT NULL,
     IdFiera int NOT NULL,
     CodiceBadge int NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS IMMAGAZZINATI(
 );
 
 CREATE TABLE IF NOT EXISTS GIOCHI_DA_TAVOLO(
-    codGioco int PRIMARY KEY,
+    codGioco int PRIMARY KEY AUTO_INCREMENT,
     nomeGioco char(30) NOT NULL,
     descrizione char(200) NOT NULL,
     regolamento char(300) NOT NULL
@@ -84,12 +84,12 @@ CREATE TABLE IF NOT EXISTS SITUATI(
 );
 
 CREATE TABLE IF NOT EXISTS TERRENI(
-    codTerreno int PRIMARY KEY,
+    codTerreno int PRIMARY KEY AUTO_INCREMENT,
     descrizione char(30)
 );
 
 CREATE TABLE IF NOT EXISTS TORNEI(
-    IdTorneo int PRIMARY KEY,
+    IdTorneo int PRIMARY KEY AUTO_INCREMENT,
     dataTorneo DATETIME NOT NULL,
     nomeTorneo char(20) NOT NULL,
     numeroSpettatori int NOT NULL,
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS VEN_MATERIALI(
 );
 
 CREATE TABLE IF NOT EXISTS SORVEGLIANO(
-    turnoDiLavoro char(10) PRIMARY KEY,
+    turnoDiLavoro DATETIME PRIMARY KEY AUTO_INCREMENT,
     IdFiera int NOT NULL,
     CodiceBadge int NOT NULL,
     FOREIGN KEY (IdFiera) REFERENCES FIERA,
@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS SORVEGLIANO(
 );
 
 CREATE TABLE IF NOT EXISTS DIPENDENTI(
-    CodiceBadge int PRIMARY KEY,
+    CodiceBadge int PRIMARY KEY AUTO_INCREMENT,
     nome char(30) NOT NULL,
     cognome char(30) NOT NULL,
     dataDiNascita DATETIME NOT NULL,
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS DIPENDENTI(
 );
 
 CREATE TABLE IF NOT EXISTS PARTECIPANTI(
-    codPartecipante int PRIMARY KEY,
+    codPartecipante int PRIMARY KEY AUTO_INCREMENT,
     nome char(30) NOT NULL,
     cognome char(30) NOT NULL,
     dataDiNascita DATETIME NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS PARTECIPANTI(
 );
 
 CREATE TABLE IF NOT EXISTS PADIGLIONI(
-    codPadiglione int PRIMARY KEY,
+    codPadiglione int PRIMARY KEY AUTO_INCREMENT,
     tipologia char(8),
     nomePadiglione char(20) NOT NULL,
     capienzaMassima int NOT NULL CHECK(capienzaMassima >= 1),
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS PARTITE_NON_UFFICIALI(
 );
 
 CREATE TABLE IF NOT EXISTS PARTITE_UFFICIALI(
-    IdMatch int PRIMARY KEY,
+    IdMatch int PRIMARY KEY AUTO_INCREMENT,
     dataPartita DATETIME NOT NULL,
     IdGiudice int NOT NULL,
     codPadiglione int NOT NULL,
@@ -179,26 +179,18 @@ CREATE TABLE IF NOT EXISTS PARTITE_UFFICIALI(
     FOREIGN KEY (IdTorneo) REFERENCES TORNEI
 );
 
-CREATE TABLE IF NOT EXISTS VINCITORI(
-    IdMatch INT NOT NULL,
+CREATE TABLE IF NOT EXISTS BATTAGLIE(
+    numeroMatch INT NOT NULL,
     codConcorrente INT NOT NULL,
-    punteggioVittoria INT NOT NULL CHECK(punteggioVittoria>=0),
-    PRIMARY KEY (IdMatch, codConcorrente),
-    FOREIGN KEY (IdMatch) REFERENCES PARTITE_UFFICIALI,
-    FOREIGN KEY (codConcorrente) REFERENCES CONCORRENTI
-);
-
-CREATE TABLE IF NOT EXISTS PERDENTI(
-    IdMatch INT NOT NULL,
-    codConcorrente INT NOT NULL,
-    punteggioSconfitta INT NOT NULL CHECK(punteggioSconfitta>=0),
-    PRIMARY KEY (IdMatch, codConcorrente),
-    FOREIGN KEY (IdMatch) REFERENCES PARTITE_UFFICIALI,
+    punteggio INT NOT NULL CHECK(punteggio>=0),
+    esito char(10) NOT NULL,
+    PRIMARY KEY (numeroMatch, codConcorrente),
+    FOREIGN KEY (numeroMatch) REFERENCES TORNEI,
     FOREIGN KEY (codConcorrente) REFERENCES CONCORRENTI
 );
 
 CREATE TABLE IF NOT EXISTS CONCORRENTI(
-    codConcorrente int PRIMARY KEY,
+    codConcorrente int PRIMARY KEY AUTO_INCREMENT,
     nome char(50) NOT NULL,
     cognome char(50) NOT NULL,
     dataDiNascita DATETIME NOT NULL,
@@ -232,7 +224,7 @@ CREATE TABLE IF NOT EXISTS SET_CARTE_BANDITE(
 );
 
 CREATE TABLE IF NOT EXISTS CARTE(
-    codCarta int PRIMARY KEY,
+    codCarta int PRIMARY KEY AUTO_INCREMENT,
     nome char(50) NOT NULL,
     tipo char(10) NOT NULL CHECK(tipo = 'Mostro' OR tipo = 'Magia' OR tipo = 'Trappola'),
     descrizione char(100),
@@ -244,20 +236,20 @@ CREATE TABLE IF NOT EXISTS CARTE(
 );
 
 CREATE TABLE IF NOT EXISTS MAZZI(
-    codMazzo int PRIMARY KEY,
+    codMazzo int PRIMARY KEY AUTO_INCREMENT,
     colore_clan char(20) NOT NULL,
     dimensioni int NOT NULL CHECK(dimensioni >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS DADI(
-    codDado int PRIMARY KEY,
+    codDado int PRIMARY KEY AUTO_INCREMENT,
     numFacce int NOT NULL CHECK(numfacce >= 4),
     colore char(20) NOT NULL,
     materiale char(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS PEDINE(
-    codPedina int PRIMARY KEY,
+    codPedina int PRIMARY KEY AUTO_INCREMENT,
     colore char(20) NOT NULL,
     materiale char(50) NOT NULL
 );
