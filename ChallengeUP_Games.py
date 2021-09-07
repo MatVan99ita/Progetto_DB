@@ -150,14 +150,18 @@ def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
         genera_tabella_query(ruolo, records)
 
 def top_giocatori(ruolo, IdGiocatore):
-    sql=""" SELECT ( (SELECT SUM(punteggioVittoria)
-        FROM )) + ()) AS punteggio totale, COUNT(punteggioVittoria) AS numeroVittorie, COUNT(punteggioSconfitte) AS numeroSconfitte
-        FROM TORNEI T, PARTITE_UFFICIALI PU, BATTAGLIE B, CONCORRENTE C
-        WHERE PU.IdTorneo = T.IdTorneo AND
-        B.IdMatch = PU.IdMatch AND
-        C.codConcorrente = B.codConcorrente AND
-        CodConcorrente = (?)
-        GROUP BY IdTorneo;"""
+    sql=""" SELECT t.IdTorneo, nome, SUM(punteggio),
+            (SELECT COUNT(esito) FROM battaglie b, partite_ufficiali pu1 WHERE pu1.IdMatch = b.IdMatch AND esito = "vittoria" AND Idcon= (?) AND pu1.IdTorneo = t.IdTorneo) AS numVittorie,
+            (SELECT COUNT(esito) FROM battaglie b ,partite_ufficiali pu1 WHERE pu1.IdMatch = b.IdMatch AND esito = "sconfitta" AND Idcon=(?) AND pu1.IdTorneo = t.IdTorneo) AS numSconfitte
+            FROM giochi_da_tavolo g, tornei t, concorrenti c, partite_ufficiali pu,battaglie b
+            WHERE t.CodGioco = g.CodGioco AND
+            pu.IdTorneo = t.IdTorneo AND
+            pu.IdMatch = b.IdMatch AND 
+            b.Idcon = c.Idcon AND 
+            c.Idcon=(?)
+            GROUP BY t.IdTorneo;"""
+
+    ss=""" SELECT T.IdTorneo, nome, SUM(B.punteggio), (SELECT COUNT(esito) FROM BATTAGLIE b, PARTITE_UFFICIALI pu1 WHERE pu1.IdMatch = b.numeroMatch AND esito = "vittoria" AND codConcorrente = 1 AND pu1.IdTorneo = t.IdTorneo) AS numVittorie, (SELECT COUNT(esito) FROM BATTAGLIE b ,PARTITE_UFFICIALI pu1 WHERE pu1.IdMatch = b.numeroMatch AND esito = "sconfitta" AND codConcorrente = 1 AND pu1.IdTorneo = t.IdTorneo) AS numSconfitte FROM GIOCHI_DA_TAVOLO g, TORNEI t, CONCORRENTI c, PARTITE_UFFICIALI pu, BATTAGLIE b WHERE t.CodGioco = g.CodGioco AND pu.IdTorneo = t.IdTorneo AND pu.IdMatch = b.numeroMatch AND b.codConcorrente = c.codConcorrente AND c.codConcorrente=1 GROUP BY t.IdTorneo;"""
 
     colonne=("IdGiocatore", "Punteggio totale")
     cursor=conn.cursor()
