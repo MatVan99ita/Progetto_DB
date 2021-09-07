@@ -7,7 +7,7 @@ from tkinter import messagebox as msg
 
 con=lite.connect("ChallengeUPGames_DB.db")
 cur=con.cursor()
-msg=""
+
 
 
 for root, dirs, files in os.walk('SQL_TABELLE/'):
@@ -15,8 +15,7 @@ for root, dirs, files in os.walk('SQL_TABELLE/'):
         print(file)
         filename, extension = os.path.splitext(file)
         if extension == '.sql':
-            script="SQL_TABELLE" + os.sep + "" + filename + "" + extension
-            print("scripettiamo")
+            script="SQL_TABELLE/" + filename + "" + extension
             print(script)
             time.sleep(1)
             cDB.riempimento(script)
