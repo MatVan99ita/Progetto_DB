@@ -25,8 +25,12 @@ try:
 except Error as e:
     print(e)
 
-conn=lite.connect("ChallengeUPGames_DB.db")
-cur=conn.cursor()
+try:
+    conn=lite.connect("./ChallengeUPGames_DB.db")
+    cur=conn.cursor()
+    print(cur)
+except Error as e:
+    msg.showerror(title="CONNESSIONE FALLITA", message="connessione fallita verso ChallengeUPGames_DB.db")
 
 def Admin_login(log):#da perfezionare ma non indispensabile ai fini del programma
     if(log):
@@ -54,11 +58,10 @@ def calcolo_dimensioni_finestra(frame, alt=0, larg=0):
     #CALCOLO DELLE DIMENSIONI DELLE COLONNE IN BASE AL NUMERO
     elif(frame=="tabella"):
         #dimensione del frame della tabella
-        nuova_larghezza=((50*screen_width)/2)/100
-        nuova_altezza=(75*screen_height)/100
+        nuova_larghezza=((larg*screen_width)/100)/2
         #suddivisione per la query
-        nuova_larghezza=(nuova_larghezza/larg)/4
-        return nuova_larghezza
+        
+        return int(nuova_larghezza)
 
     geometria="%dx%d" % (nuova_larghezza, nuova_altezza)
 
@@ -89,25 +92,37 @@ def program_start(tipologia_utente):
         #    print("errore user e/o password")
         #controllo sulle credenziali
 
-def genera_tabella_query(tipo, ris):
-    total_rows=len(ris)
-
-    dimensione_colonna=calcolo_dimensioni_finestra("tabella", total_rows, len(ris))
+def genera_tabella_query(tipo, records, colonne):
+    total_rows=len(records[0])
+    print(records)
+    print("righe totali = " + str(total_rows))
+    i=0
+    j=0
+    dimensione_colonna=calcolo_dimensioni_finestra("tabella", total_rows, colonne)
     print(dimensione_colonna)
     if(tipo=="user"):
-        clear_frame(db_frame_user)
-        for i in range(total_rows):
-            for j in range(ris):
+        for rows in records:
+            for data in rows:
+                print("dato=" + records[i][j])
                 e = Listbox(db_frame_user, width=int(dimensione_colonna), height=1)
                 e.grid(row=i, column=j)
-                e.insert(END, ris[i][j])
+                e.insert(END, records[i][j])
+                j=j+1
+            j=0
+            i=i+1
     else:
         clear_frame(db_frame_admin)
-        for i in range(total_rows):
-            for j in range(ris):
+        for rows in records:
+            for data in rows:
+                print("dato=" + records[i][j])
                 e = Listbox(db_frame_admin, width=int(dimensione_colonna), height=1)
                 e.grid(row=i, column=j)
-                e.insert(END, ris[i][j])
+                e.insert(END, records[i][j])
+                j=j+1
+            j=0
+            i=i+1
+
+
 
 def controlloData(giorno, mese, anno):
     g=len(giorno)
@@ -140,9 +155,8 @@ def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
             T.dataTorneo=(?);"""
 
         colonne=("IdTorneo","nomeTorneo", "numeroSpettatori", "numeroPartecipanti", "codGioco", "IdFiera", "IdMatch", "dataPartita", "nomePadiglione" )
-        cursor=conn.cursor()
-        cursor.execute(sql, data)
-        records=cursor.fetchall()
+        cur.execute(sql, data)
+        records=cur.fetchall()
         print(records)
         tabella=colonne
         tabella.append(records)
@@ -253,21 +267,32 @@ def inserimento_Torneo(dataTorneo, nomeTorneo, numeroSpettatori, numeroPatecipan
             msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento del torneo\n"+str(e))
 
 def gioco_partite_ufficiose():
-    sql=""" SELECT nomeGioco, descrizione, regolamento, SUM(numeroPartite) AS partiteTotali
-            FROM PARTITE_NON_UFFICIALI PNU, GIOCHI_DA_TAVOLO G
-            WHERE PNU.CodGioco = G.CodGioco
-            GROUP BY PNU.CodGioco
-            ORDER BY 4
-            """
+    sql="""SELECT nomeGioco, descrizione, regolamento, SUM(numeroPartite) AS partiteTotali
+FROM PARTITE_NON_UFFICIALI PNU, GIOCHI_DA_TAVOLO G
+WHERE PNU.CodGioco = G.CodGioco
+GROUP BY G.CodGioco
+ORDER BY 4
+LIMIT 1"""
 
-    colonne=("Nome", "Descrizione", "Regolamento", "Partite totali")
-    cursor=conn.cursor()
-    cursor.execute(sql, "")
-    records=cursor.fetchall()
-    print(colonne)
-    print(records)
-    tabella=colonne
-    genera_tabella_query("admin", records)
+    print(sql)
+
+    colonne=["Nome", "Descrizione", "Regolamento", "Partite totali"]
+    tabella=[]
+    tabella.append(colonne)
+    try:
+        conn.execute(sql, ())
+        conn.commit()
+        records=conn.fetchall()
+        print(colonne)
+        print("records")
+        print(records)
+        tabella.append(records)
+        print("tabella")
+        print(tabella)
+        genera_tabella_query("admin", tabella, len(tabella))
+    except Error as e:
+        msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera\n"+str(e))
+
 
 def guadagni_stands():
     sql=""" SELECT V.codStand, SUM(prezzoTotale) AS guadagnoTotale, 
