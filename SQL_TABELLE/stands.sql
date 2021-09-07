@@ -1,0 +1,13 @@
+INSERT INTO STANDS (codStand, nome, idFiera, CodiceBadge) VALUES (0, "AbS",1,6),
+(1, "Standg",1,7),
+(2, "GameS",2,10),
+(3, "StandsGame",3,8),
+(4, "TableGS",3,9),
+(5, "gSt",4,9),
+(6, "JVF",4,6),
+(7, "Gamert",5,7),
+(8, "IDRstand",6,10),
+(9, "KMDgame",7,8),
+(10, "gAmSTa",7,8),
+(11, "LkiGames",8,9),
+(12, "MAtstands",8,6);

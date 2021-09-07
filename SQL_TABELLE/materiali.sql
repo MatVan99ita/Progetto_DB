@@ -1,0 +1,11 @@
+INSERT INTO MATERIALI_DA_GIOCO (codMateriale, codDado, codPedina, codMazzo) VALUES (1,1,null,null),
+(2,2,null,null), 
+(3,3,null,null), 
+(4,null,1,null), 
+(5,null,2,null), 
+(6,null,3,null), 
+(7,null,null,1),
+(8,null,null,2), 
+(9,null,null,3), 
+(10,null,null,4), 
+(11,null,null,5);

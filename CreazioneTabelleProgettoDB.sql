@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS NAZIONI(
 );
 
 CREATE TABLE IF NOT EXISTS CITTA(
-    IdCittà int PRIMARY KEY,
-    nomeCittà char(60) NOT NULL,
+    IdCitta int PRIMARY KEY,
+    nomeCitta char(60) NOT NULL,
     IdNazione INT NOT NULL, 
   	FOREIGN KEY (IdNazione) REFERENCES NAZIONI
 );
@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS FIERE(
     dataInizioFiera DATETIME NOT NULL,
     dataFineFiera DATETIME NOT NULL,
     IdNazione int,
-    IdCittà int,
+    IdCitta int,
     FOREIGN KEY (IdNazione) references CITTA,
-    FOREIGN KEY (IdCittà) references CITTA
+    FOREIGN KEY (IdCitta) references CITTA
 );
 
 CREATE TABLE IF NOT EXISTS VENDITE(
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS STANDS(
 );
 
 CREATE TABLE IF NOT EXISTS CONTENUTI(
-    quantitàGiochi int NOT NULL,
+    quantitaGiochi int NOT NULL,
     codStand INT NOT NULL,
     codGioco INT NOT NULL,
     PRIMARY KEY(codStand, codGioco),
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS CONTENUTI(
 );
 
 CREATE TABLE IF NOT EXISTS IMMAGAZZINATI(
-    quantitàMateriale int NOT NULL,
+    quantitaMateriale int NOT NULL,
     codStand INT NOT NULL,
     codMateriale INT NOT NULL,
     PRIMARY KEY (codStand, codMateriale),
@@ -64,7 +64,8 @@ CREATE TABLE IF NOT EXISTS GIOCHI_DA_TAVOLO(
     codGioco int PRIMARY KEY,
     nomeGioco char(30) NOT NULL,
     descrizione char(200) NOT NULL,
-    regolamento char(300) NOT NULL
+    regolamento char(300) NOT NULL,
+    tipo char(15) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS FORMATI(
@@ -104,7 +105,7 @@ CREATE TABLE IF NOT EXISTS VEN_GIOCHI(
     codGioco int NOT NULL,
     codStand int NOT NULL,
     codVendita int NOT NULL,
-    quantitàGiochiSelezionati int NOT NULL,
+    quantitaGiochiSelezionati int NOT NULL,
     PRIMARY KEY (codGioco, codStand, codVendita),
     FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO,
     FOREIGN KEY (codStand) REFERENCES STANDS,
@@ -115,7 +116,7 @@ CREATE TABLE IF NOT EXISTS VEN_MATERIALI(
     codMateriale int NOT NULL,
     codStand int NOT NULL,
     codVendita int NOT NULL,
-    quantitàMaterialiSelezionati int NOT NULL,
+    quantitaMaterialiSelezionati int NOT NULL,
     PRIMARY KEY (codMateriale, codStand, codVendita),
     FOREIGN KEY (codMateriale) REFERENCES GIOCHI_DA_TAVOLO,
     FOREIGN KEY (codStand) REFERENCES STANDS,
@@ -198,19 +199,19 @@ CREATE TABLE IF NOT EXISTS CONCORRENTI(
 );
 
 CREATE TABLE IF NOT EXISTS POSSIEDONO(
-    codGioco INT NOT NULL,
-    codCarta INT NOT NULL,
-    PRIMARY KEY (codGioco, codCarta),
-    FOREIGN KEY (codGioco) REFERENCES GIOCHI_DA_TAVOLO,
-    FOREIGN KEY (codCarta) REFERENCES CARTE
+    codMateriale INT NOT NULL,
+    codConcorrente INT NOT NULL,
+    PRIMARY KEY (codMateriale, codConcorrente),
+    FOREIGN KEY (codMateriale) REFERENCES MATERIALI_DA_GIOCO,
+    FOREIGN KEY (codConcorrente) REFERENCES CONCORRENTI
 );
 
 CREATE TABLE IF NOT EXISTS COMPOSTI(
     codMazzo INT NOT NULL,
     codCarta INT NOT NULL,
     PRIMARY KEY (codMazzo, codCarta),
-    FOREIGN KEY (codMazzo) REFERENCES MAZZI,
-    FOREIGN KEY (codCarta) REFERENCES CARTE
+    FOREIGN KEY (codMazzo) REFERENCES MAZZI(codMazzo),
+    FOREIGN KEY (codCarta) REFERENCES CARTE(codCarta)
 );
 
 CREATE TABLE IF NOT EXISTS SET_CARTE_BANDITE(
@@ -226,8 +227,8 @@ CREATE TABLE IF NOT EXISTS SET_CARTE_BANDITE(
 CREATE TABLE IF NOT EXISTS CARTE(
     codCarta int PRIMARY KEY,
     nome char(50) NOT NULL,
-    tipo char(10) NOT NULL CHECK(tipo = 'Mostro' OR tipo = 'Magia' OR tipo = 'Trappola'),
-    descrizione char(100),
+    tipo char(100) NOT NULL,
+    descrizione char(10) NOT NULL CHECK(descrizione = 'Mostro' OR descrizione = 'Magia' OR descrizione = 'Trappola'),
     costoMana int,
     attributo char(10),
     attacco int,
@@ -245,7 +246,7 @@ CREATE TABLE IF NOT EXISTS DADI(
     codDado int PRIMARY KEY,
     numFacce int NOT NULL CHECK(numfacce >= 4),
     colore char(20) NOT NULL,
-    materiale char(50) NOT NULL
+    tipoCarattere char(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS PEDINE(
@@ -257,13 +258,13 @@ CREATE TABLE IF NOT EXISTS PEDINE(
 CREATE TABLE IF NOT EXISTS MATERIALI_DA_GIOCO(
   codMateriale int NOT NULL,
   codDado int, 
-  codCarta INT, 
+  codMazzo INT, 
   codPedina int,
   primary key (codMateriale) --,
 --    CHECK(EXISTS( (SELECT * FROM DADI WHERE codDado IS NOT NULL AND DADI.codDado=codMateriale) OR 
 --               (select * from PEDINE where codPedina IS NOT NULL AND PEDINE.codPedina=codMateriale) OR 
---               (select * from CARTE where codCarta IS NOT NULL AND CARTE.codCarta=codMateriale))
+--               (select * from MAZZI where codMazzo IS NOT NULL AND MAZZI.codMazzo=codMateriale))
 ,
     foreign key (codDado) references DADI,
     foreign key (codPedina) references PEDINE,
-    foreign key (codCarta) references CARTE);
+    foreign key (codMazzo) references MAZZI);

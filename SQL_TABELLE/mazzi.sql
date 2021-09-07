@@ -1,0 +1,1 @@
+INSERT INTO MAZZI (codMazzo, colore_clan, dimensioni)  VALUES (0, "rosso",30), (1, "verde",30), (2, "giallo",30), (3, "blu",30), (4, "viola",30);
