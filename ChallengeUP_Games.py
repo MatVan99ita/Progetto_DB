@@ -21,11 +21,6 @@ nomeFrame=Frame()
 dataTorneo=tk.StringVar()
 
 try:
-    connessione_DB.creazione_tabelle()
-except Error as e:
-    print(e)
-
-try:
     conn=lite.connect("./ChallengeUPGames_DB.db")
     cur=conn.cursor()
     print(cur)
@@ -103,7 +98,6 @@ def genera_tabella_query(tipo, records, colonne):
     if(tipo=="user"):
         for rows in records:
             for data in rows:
-                print("dato=" + records[i][j])
                 e = Listbox(db_frame_user, width=int(dimensione_colonna), height=1)
                 e.grid(row=i, column=j)
                 e.insert(END, records[i][j])
@@ -114,7 +108,6 @@ def genera_tabella_query(tipo, records, colonne):
         clear_frame(db_frame_admin)
         for rows in records:
             for data in rows:
-                print("dato=" + records[i][j])
                 e = Listbox(db_frame_admin, width=int(dimensione_colonna), height=1)
                 e.grid(row=i, column=j)
                 e.insert(END, records[i][j])
@@ -272,21 +265,26 @@ FROM PARTITE_NON_UFFICIALI PNU, GIOCHI_DA_TAVOLO G
 WHERE PNU.CodGioco = G.CodGioco
 GROUP BY G.CodGioco
 ORDER BY 4
-LIMIT 1"""
+LIMIT 2"""
 
     print(sql)
-
+    index=0
     colonne=["Nome", "Descrizione", "Regolamento", "Partite totali"]
     tabella=[]
+    cursor=conn.cursor()
     tabella.append(colonne)
     try:
-        conn.execute(sql, ())
+        cursor.execute(sql, ())
         conn.commit()
-        records=conn.fetchall()
-        print(colonne)
+        records=cursor.fetchall()
         print("records")
         print(records)
-        tabella.append(records)
+        for i in records:
+            print("EHEHEHEHEHEHEHEHEHEHEH")
+            print(i)
+            tabella.append(i)
+            index=index+1
+        print(colonne)
         print("tabella")
         print(tabella)
         genera_tabella_query("admin", tabella, len(tabella))
