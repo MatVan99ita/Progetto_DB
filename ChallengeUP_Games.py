@@ -5,6 +5,7 @@ from tkinter import Listbox
 from tkinter import messagebox as msg
 import sqlite3 as lite
 from sqlite3 import Error
+from tkinter import ttk
 import connessione_DB
 
 
@@ -19,7 +20,6 @@ name_entry=tk.StringVar()
 nomeFrame=Frame()
 
 dataTorneo=tk.StringVar()
-
 try:
     conn=lite.connect("./ChallengeUPGames_DB.db")
     cur=conn.cursor()
@@ -64,7 +64,7 @@ def calcolo_dimensioni_finestra(frame, alt=0, larg=1):
 
 def clear_frame(frame):
    for widgets in frame.winfo_children():
-      widgets.destroy()
+        widgets.destroy()
 
 def program_start(tipologia_utente):
     
@@ -93,27 +93,36 @@ def genera_tabella_query(tipo, records, colonne):
     print("righe totali = " + str(total_rows))
     i=0
     j=0
+    index=0
     dimensione_colonna=calcolo_dimensioni_finestra("tabella", total_rows, colonne)
     print(dimensione_colonna)
     clear_frame(db_frame_admin)
     if(tipo=="user"):
-        for rows in records:
-            for data in rows:
-                e = Listbox(db_frame_user, width=int(dimensione_colonna), height=1)
-                e.grid(row=i, column=j)
-                e.insert(END, records[i][j])
-                j=j+1
-            j=0
-            i=i+1
+        frame=db_frame_user
     else:
-        for rows in records:
-            for data in rows:
-                e = Listbox(db_frame_admin, width=int(dimensione_colonna), height=1)
-                e.grid(row=i, column=j)
-                e.insert(END, records[i][j])
-                j=j+1
-            j=0
-            i=i+1
+        frame=db_frame_admin
+
+    e=tk.Listbox()
+    # only the column containing the text is resized when the window size changes:
+    frame.columnconfigure(0, weight=1) 
+    # resize row 0 height when the window is resized
+    i=i+1
+    frame.rowconfigure(0, weight=1)
+    for rows in records:
+        for data in rows:
+            e = Listbox(frame, width=int(dimensione_colonna), height=1)
+            e.grid(row=i, column=j)
+            e.insert(END, records[i][j])
+            e.configure(yscrollcommand=scroll_y.set)
+            e.configure(yscrollcommand=scroll_x.set)
+            j=j+1
+            index=index+1
+        j=0
+    scroll_y.grid(row=0, column=index, sticky="ns")
+    scroll_x.grid(row=i, column=0, sticky="ns")
+    # bind txt to scrollbar
+    #admin_scroll_vertical=ttk.Scrollbar(frame, orient=VERTICAL).pack(fill=Y, side=RIGHT, expand=FALSE)
+    #admin_scroll_horizontal=ttk.Scrollbar(frame, orient=HORIZONTAL).pack(fill=X, side=BOTTOM, expand=FALSE)
 
 def genera_matrice_query(records, colonne):
     tabella=[]
@@ -285,15 +294,17 @@ def inserimento_Torneo(dataTorneo, nomeTorneo, numeroSpettatori, numeroPatecipan
             msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento del torneo\n"+str(e))
 
 def gioco_partite_ufficiose():
-    sql="""SELECT nomeGioco, descrizione, regolamento, SUM(numeroPartite) AS partiteTotali
-            FROM PARTITE_NON_UFFICIALI PNU, GIOCHI_DA_TAVOLO G
-            WHERE PNU.CodGioco = G.CodGioco
-            GROUP BY G.CodGioco
-            ORDER BY 4
-            LIMIT 2"""
+    #sql="""SELECT nomeGioco, descrizione, regolamento, SUM(numeroPartite) AS partiteTotali
+    #        FROM PARTITE_NON_UFFICIALI PNU, GIOCHI_DA_TAVOLO G
+    #        WHERE PNU.CodGioco = G.CodGioco
+    #        GROUP BY G.CodGioco
+    #        ORDER BY 4
+    #        LIMIT 2"""
 
     index=0
-    colonne=["Nome", "Descrizione", "Regolamento", "Partite totali"]
+    #colonne=["Nome", "Descrizione", "Regolamento", "Partite totali"]
+    colonne=["", "", "", "", "", "","", "", "","", "", "","", "", "","", "", "","", "", "","", "", ""]
+    sql="""SELECT * FROM FIERE, TORNEI, PARTITE_UFFICIALI, BATTAGLIE LIMIT 90"""
     tabella=[]
     cursor=conn.cursor()
     tabella.append(colonne)
@@ -728,6 +739,8 @@ db_frame_user = tk.Frame(top_frame, highlightbackground="green", highlightcolor=
 
 db_frame_user.pack(side=tk.RIGHT)
 
+scroll_y = Scrollbar(db_frame_user, orient="vertical", command=e.yview).grid(row=0, column=2)
+scroll_x = Scrollbar(db_frame_user, orient="horizontal", command=e.yview).grid(row=1, column=1)
 top_frame.pack_forget()
 #####################################
 
@@ -785,7 +798,7 @@ db_param_frame_admin.pack(side=tk.BOTTOM)
 #####################################
 db_frame_admin = tk.Frame(admin_frame, highlightbackground="green", highlightcolor="green", highlightthickness=1, width=dimensioni_frame_tabella[0], height=dimensioni_frame_tabella[1])
 
-db_frame_admin.pack(side=tk.RIGHT)
+db_frame_admin.pack(side=tk.RIGHT, fill=BOTH, expand=TRUE)
 
 admin_frame.pack_forget()
 
