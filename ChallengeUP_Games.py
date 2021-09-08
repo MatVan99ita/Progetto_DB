@@ -127,27 +127,6 @@ def genera_tabella_query(tipo, records, colonne):
         i=i+1
         _widgets.append(current_row)
 
-    # only the column containing the text is resized when the window size changes:
-    frame.columnconfigure(0, weight=1) 
-    # resize row 0 height when the window is resized
-    i=i+1
-    frame.rowconfigure(0, weight=1)
-    for rows in records:
-        for data in rows:
-            e = Listbox(frame, width=int(dimensione_colonna), height=1)
-            e.grid(row=i, column=j)
-            e.insert(END, records[i][j])
-            e.configure(yscrollcommand=scroll_y.set)
-            e.configure(yscrollcommand=scroll_x.set)
-            j=j+1
-            index=index+1
-        j=0
-    scroll_y.grid(row=0, column=index, sticky="ns")
-    scroll_x.grid(row=i, column=0, sticky="ns")
-    # bind txt to scrollbar
-    #admin_scroll_vertical=ttk.Scrollbar(frame, orient=VERTICAL).pack(fill=Y, side=RIGHT, expand=FALSE)
-    #admin_scroll_horizontal=ttk.Scrollbar(frame, orient=HORIZONTAL).pack(fill=X, side=BOTTOM, expand=FALSE)
-
 def genera_matrice_query(records, colonne):
     tabella=[]
     index=0
