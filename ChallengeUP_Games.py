@@ -53,10 +53,8 @@ def calcolo_dimensioni_finestra(frame, alt=0, larg=1):
     #CALCOLO DELLE DIMENSIONI DELLE COLONNE IN BASE AL NUMERO
     elif(frame=="tabella"):
         #dimensione del frame della tabella
-        nuova_larghezza=(screen_width/larg)/2
-        #suddivisione per la query
-        
-        return int(nuova_larghezza)
+        nuova_altezza=(75*screen_height)/100
+        nuova_larghezza=(((50*screen_width)/2)/100)/larg
 
     geometria="%dx%d" % (nuova_larghezza, nuova_altezza)
 
@@ -93,16 +91,16 @@ def genera_tabella_query(tipo, records, colonne):
     print("righe totali = " + str(total_rows))
     i=0
     j=0
-    index=0
-    dimensione_colonna=calcolo_dimensioni_finestra("tabella", total_rows, colonne)
-    print(dimensione_colonna)
+    geometria_tabella=calcolo_dimensioni_finestra("tabella", total_rows, colonne)
+    dim_tabella=geometria_tabella.split("x")
+    print(dim_tabella[0])
     clear_frame(db_frame_admin)
     if(tipo=="user"):
         frame=db_frame_user
     else:
         frame=db_frame_admin
 
-    text_area = tk.Canvas(frame, background="black", width=400, height=500, scrollregion=(0,0,1200,800))
+    text_area = tk.Canvas(frame, background="black", width=400, height=dim_tabella[1], scrollregion=(0,0,1200,800))
     hscroll = tk.Scrollbar(frame, orient=tk.HORIZONTAL, command=text_area.xview)
     vscroll = tk.Scrollbar(frame, orient=tk.VERTICAL, command=text_area.yview)
     text_area['xscrollcommand'] = hscroll.set
@@ -113,16 +111,17 @@ def genera_tabella_query(tipo, records, colonne):
     vscroll.grid(row=0, column=1, sticky=tk.N+tk.S)
 
     _widgets = []
-
-    for row in records:
+    print("##################################################### RECORD NELLA CREAZIONE TABELLA #####################################################")
+    print(records)
+    print("###############################################################################################################################################################")
+    for row in range(total_rows):
         current_row = []
-        print("RIGHELLO")
-        print(records[i])
-        for column in row:
-            label = tk.Label(text_area, text=str(records[i][j]), borderwidth=0, width=dimensione_colonna)
+        for column in range(row):
+            label = tk.Label(text_area, text=str(records[i][j]), borderwidth=0, width=dim_tabella[0])
             j=j+1
-            label.grid(row=row, column=column, sticky="nsew", padx=1, pady=1)
+            label.grid(row=i, column=j, sticky="nsew", padx=1, pady=1)
             current_row.append(label)
+        print(current_row)
         j=0
         i=i+1
         _widgets.append(current_row)
@@ -306,7 +305,7 @@ def gioco_partite_ufficiose():
 
     index=0
     #colonne=["Nome", "Descrizione", "Regolamento", "Partite totali"]
-    colonne=["", "", "", "", ""]
+    colonne=("q", "w", "e", "r", "t")
     sql="""SELECT * FROM BATTAGLIE"""
     tabella=[]
     cursor=conn.cursor()
