@@ -54,7 +54,8 @@ def calcolo_dimensioni_finestra(frame, alt=0, larg=1):
     elif(frame=="tabella"):
         #dimensione del frame della tabella
         nuova_altezza=(75*screen_height)/100
-        nuova_larghezza=(((50*screen_width)/2)/100)/(larg*2)
+        #nuova_larghezza=(((50*screen_width)/2)/100)/(larg*2)
+        nuova_larghezza=(screen_width/larg)/2
 
     geometria="%dx%d" % (nuova_larghezza, nuova_altezza)
 
@@ -95,7 +96,10 @@ def genera_tabella_query(tipo, records, colonne):
     i=0
     j=0
     geometria_tabella=calcolo_dimensioni_finestra("tabella", total_rows, colonne)
+    
+    geometria_frame=calcolo_dimensioni_finestra("frame tabella")
     dim_tabella=geometria_tabella.split("x")
+    dim_frame=geometria_frame.split("x")
     print("dimensioni_tabella")
     print(geometria_tabella)
     clear_frame(db_frame_admin)
@@ -104,7 +108,7 @@ def genera_tabella_query(tipo, records, colonne):
     else:
         frame=db_frame_admin
 
-    text_area = tk.Canvas(frame, background="black", width=400, height=dim_tabella[1], scrollregion=(0,0,1200,800))
+    text_area = tk.Canvas(frame, background="black", width=dim_frame[0], height=dim_tabella[1], scrollregion=(0,0,1200,800))
     hscroll = tk.Scrollbar(frame, orient=tk.HORIZONTAL, command=text_area.xview)
     vscroll = tk.Scrollbar(frame, orient=tk.VERTICAL, command=text_area.yview)
     text_area['xscrollcommand'] = hscroll.set
@@ -118,6 +122,7 @@ def genera_tabella_query(tipo, records, colonne):
     print("##################################################### RECORD NELLA CREAZIONE TABELLA #####################################################")
     print(records)
     print("##########################################################################################################################################")
+
     for row in range(total_rows):
         current_row = []
         for column in range(total_columns):
