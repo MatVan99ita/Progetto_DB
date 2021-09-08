@@ -102,7 +102,31 @@ def genera_tabella_query(tipo, records, colonne):
     else:
         frame=db_frame_admin
 
-    e=tk.Listbox()
+    text_area = tk.Canvas(frame, background="black", width=400, height=500, scrollregion=(0,0,1200,800))
+    hscroll = tk.Scrollbar(frame, orient=tk.HORIZONTAL, command=text_area.xview)
+    vscroll = tk.Scrollbar(frame, orient=tk.VERTICAL, command=text_area.yview)
+    text_area['xscrollcommand'] = hscroll.set
+    text_area['yscrollcommand'] = vscroll.set
+
+    text_area.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E+tk.W)
+    hscroll.grid(row=1, column=0, sticky=tk.E+tk.W)
+    vscroll.grid(row=0, column=1, sticky=tk.N+tk.S)
+
+    _widgets = []
+
+    for row in records:
+        current_row = []
+        print("RIGHELLO")
+        print(records[i])
+        for column in row:
+            label = tk.Label(text_area, text=str(records[i][j]), borderwidth=0, width=dimensione_colonna)
+            j=j+1
+            label.grid(row=row, column=column, sticky="nsew", padx=1, pady=1)
+            current_row.append(label)
+        j=0
+        i=i+1
+        _widgets.append(current_row)
+
     # only the column containing the text is resized when the window size changes:
     frame.columnconfigure(0, weight=1) 
     # resize row 0 height when the window is resized
@@ -303,8 +327,8 @@ def gioco_partite_ufficiose():
 
     index=0
     #colonne=["Nome", "Descrizione", "Regolamento", "Partite totali"]
-    colonne=["", "", "", "", "", "","", "", "","", "", "","", "", "","", "", "","", "", "","", "", ""]
-    sql="""SELECT * FROM FIERE, TORNEI, PARTITE_UFFICIALI, BATTAGLIE LIMIT 90"""
+    colonne=["", "", "", "", ""]
+    sql="""SELECT * FROM BATTAGLIE"""
     tabella=[]
     cursor=conn.cursor()
     tabella.append(colonne)
@@ -739,8 +763,6 @@ db_frame_user = tk.Frame(top_frame, highlightbackground="green", highlightcolor=
 
 db_frame_user.pack(side=tk.RIGHT)
 
-scroll_y = Scrollbar(db_frame_user, orient="vertical", command=e.yview).grid(row=0, column=2)
-scroll_x = Scrollbar(db_frame_user, orient="horizontal", command=e.yview).grid(row=1, column=1)
 top_frame.pack_forget()
 #####################################
 
