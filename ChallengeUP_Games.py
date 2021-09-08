@@ -36,7 +36,7 @@ def Admin_login(log):#da perfezionare ma non indispensabile ai fini del programm
         #accesso utente senza log in e senza funzionalità aggiuntive
         program_start("user")
 
-def calcolo_dimensioni_finestra(frame, alt=0, larg=0):
+def calcolo_dimensioni_finestra(frame, alt=0, larg=1):
 
     if(frame=="inizio"):
         nuova_altezza=(10*screen_height)/100
@@ -53,7 +53,7 @@ def calcolo_dimensioni_finestra(frame, alt=0, larg=0):
     #CALCOLO DELLE DIMENSIONI DELLE COLONNE IN BASE AL NUMERO
     elif(frame=="tabella"):
         #dimensione del frame della tabella
-        nuova_larghezza=((larg*screen_width)/100)/2
+        nuova_larghezza=(screen_width/larg)/2
         #suddivisione per la query
         
         return int(nuova_larghezza)
@@ -95,6 +95,7 @@ def genera_tabella_query(tipo, records, colonne):
     j=0
     dimensione_colonna=calcolo_dimensioni_finestra("tabella", total_rows, colonne)
     print(dimensione_colonna)
+    clear_frame(db_frame_admin)
     if(tipo=="user"):
         for rows in records:
             for data in rows:
@@ -105,7 +106,6 @@ def genera_tabella_query(tipo, records, colonne):
             j=0
             i=i+1
     else:
-        clear_frame(db_frame_admin)
         for rows in records:
             for data in rows:
                 e = Listbox(db_frame_admin, width=int(dimensione_colonna), height=1)
@@ -115,7 +115,15 @@ def genera_tabella_query(tipo, records, colonne):
             j=0
             i=i+1
 
-
+def genera_matrice_query(records, colonne):
+    tabella=[]
+    index=0
+    tabella.append(colonne)
+    for i in records:
+            tabella.append(i)
+            index=index+1
+    print(tabella)
+    return tabella
 
 def controlloData(giorno, mese, anno):
     g=len(giorno)
@@ -157,25 +165,42 @@ def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
         genera_tabella_query(ruolo, records)
 
 def top_giocatori(ruolo, IdGiocatore):
-    sql=""" SELECT t.IdTorneo, nome, SUM(punteggio),
-            (SELECT COUNT(esito) FROM battaglie b, partite_ufficiali pu1 WHERE pu1.IdMatch = b.IdMatch AND esito = "vittoria" AND Idcon= (?) AND pu1.IdTorneo = t.IdTorneo) AS numVittorie,
-            (SELECT COUNT(esito) FROM battaglie b ,partite_ufficiali pu1 WHERE pu1.IdMatch = b.IdMatch AND esito = "sconfitta" AND Idcon=(?) AND pu1.IdTorneo = t.IdTorneo) AS numSconfitte
-            FROM giochi_da_tavolo g, tornei t, concorrenti c, partite_ufficiali pu,battaglie b
+    sql=""" SELECT t.IdTorneo, nome, cognome, SUM(b.punteggio),
+            (
+                SELECT COUNT(esito) 
+                FROM BATTAGLIE b, PARTITE_UFFICIALI pu1 
+                WHERE pu1.IdMatch = b.numeroMatch AND 
+                esito = "vittoria" AND
+                pu1.IdTorneo = t.IdTorneo
+            ) AS numVittorie,
+            (
+                SELECT COUNT(esito)
+                FROM BATTAGLIE b ,PARTITE_UFFICIALI pu1
+                WHERE pu1.IdMatch = b.numeroMatch AND
+                esito = "sconfitta" AND
+                pu1.IdTorneo = t.IdTorneo
+            ) AS numSconfitte
+            FROM GIOCHI_DA_TAVOLO g, TORNEI t, CONCORRENTI c, PARTITE_UFFICIALI pu, BATTAGLIE b
             WHERE t.CodGioco = g.CodGioco AND
             pu.IdTorneo = t.IdTorneo AND
-            pu.IdMatch = b.IdMatch AND 
-            b.Idcon = c.Idcon AND 
-            c.Idcon=(?)
-            GROUP BY t.IdTorneo;"""
+            pu.IdMatch = b.numeroMatch AND 
+            b.codConcorrente = c.codConcorrente
+            GROUP BY c.codConcorrente; """
 
-    ss=""" SELECT T.IdTorneo, nome, SUM(B.punteggio), (SELECT COUNT(esito) FROM BATTAGLIE b, PARTITE_UFFICIALI pu1 WHERE pu1.IdMatch = b.numeroMatch AND esito = "vittoria" AND codConcorrente = 1 AND pu1.IdTorneo = t.IdTorneo) AS numVittorie, (SELECT COUNT(esito) FROM BATTAGLIE b ,PARTITE_UFFICIALI pu1 WHERE pu1.IdMatch = b.numeroMatch AND esito = "sconfitta" AND codConcorrente = 1 AND pu1.IdTorneo = t.IdTorneo) AS numSconfitte FROM GIOCHI_DA_TAVOLO g, TORNEI t, CONCORRENTI c, PARTITE_UFFICIALI pu, BATTAGLIE b WHERE t.CodGioco = g.CodGioco AND pu.IdTorneo = t.IdTorneo AND pu.IdMatch = b.numeroMatch AND b.codConcorrente = c.codConcorrente AND c.codConcorrente=1 GROUP BY t.IdTorneo;"""
-
-    colonne=("IdGiocatore", "Punteggio totale")
+    colonne=["IdTorneo", "Nome", "Cognome", "Punteggio tot", "Vittorie tot", "Sconfitte tot"]
     cursor=conn.cursor()
-    cursor.execute(sql, IdGiocatore)
+
     records=cursor.fetchall()
-    colonne.append(records)
-    genera_tabella_query(ruolo, colonne)
+    index=0
+    cursor=conn.cursor()
+    try:
+        cursor.execute(sql)
+        conn.commit()
+        records=cursor.fetchall()
+        tabella=genera_matrice_query(records, colonne)
+        genera_tabella_query(ruolo, tabella, len(tabella))
+    except Error as e:
+        msg.showerror(title="ERRORE CARICAMENTO DATI", message="qualcosa è andato storto con la richiesta dei dati\n"+str(e))
 
 
 def lista_carte_bandite_formato(ruolo):
@@ -261,13 +286,12 @@ def inserimento_Torneo(dataTorneo, nomeTorneo, numeroSpettatori, numeroPatecipan
 
 def gioco_partite_ufficiose():
     sql="""SELECT nomeGioco, descrizione, regolamento, SUM(numeroPartite) AS partiteTotali
-FROM PARTITE_NON_UFFICIALI PNU, GIOCHI_DA_TAVOLO G
-WHERE PNU.CodGioco = G.CodGioco
-GROUP BY G.CodGioco
-ORDER BY 4
-LIMIT 2"""
+            FROM PARTITE_NON_UFFICIALI PNU, GIOCHI_DA_TAVOLO G
+            WHERE PNU.CodGioco = G.CodGioco
+            GROUP BY G.CodGioco
+            ORDER BY 4
+            LIMIT 2"""
 
-    print(sql)
     index=0
     colonne=["Nome", "Descrizione", "Regolamento", "Partite totali"]
     tabella=[]
@@ -277,16 +301,7 @@ LIMIT 2"""
         cursor.execute(sql, ())
         conn.commit()
         records=cursor.fetchall()
-        print("records")
-        print(records)
-        for i in records:
-            print("EHEHEHEHEHEHEHEHEHEHEH")
-            print(i)
-            tabella.append(i)
-            index=index+1
-        print(colonne)
-        print("tabella")
-        print(tabella)
+        tabella=genera_matrice_query(records, colonne)
         genera_tabella_query("admin", tabella, len(tabella))
     except Error as e:
         msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera\n"+str(e))
@@ -413,6 +428,7 @@ def genera_parametri(azione, ruolo):
             giorno_var=tk.StringVar()
             mese_var=tk.StringVar()
             anno_var=tk.StringVar()
+            nomeFrame.pack()
             lbl_dataTorneo = tk.Label(nomeFrame, bg='#c7c7c7', text="Inserire data GIORNO(gg)/MESE(mm)/ANNO(yyyy)").grid(row=0, column=0)
             ent_giorno = tk.Entry(nomeFrame, textvariable=giorno_var).grid(row=0, column=1)
             ent_mese = tk.Entry(nomeFrame, textvariable=mese_var).grid(row=0, column=2)
@@ -421,16 +437,18 @@ def genera_parametri(azione, ruolo):
 
         elif(azione=="U2"):#Dato un concorrente ritornare il punteggio totale, numero vittorie e numero sconfitte per ogni torneo in cui ha partecipato
             giocatore_var=tk.StringVar()
+            nomeFrame.pack()
             lbl_IdGiocatore = tk.Label(nomeFrame, bg='#c7c7c7', text="Inserire IdGiocatore:").grid(row=0, column=0)
             ent_Giocatore = tk.Entry(nomeFrame, textvariable=giocatore_var).grid(row=0, column=1)
             btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : top_giocatori( ruolo, giocatore_var.get()) ).grid(row=1, column=0)
         
         elif(azione=="U3"):#Lista delle carte bandite dall'attuale formato
             #questa richiede solo la data attuale presa direttamente da sistema
-            print()
+            nomeFrame.pack_forget()
         
         elif(azione=="U4"):#Lista delle carte di un mazzo specificato
             mazzo_var=tk.StringVar()
+            nomeFrame.pack()
             lbl_Mazzo = tk.Label(nomeFrame, bg='#c7c7c7', text="Inserire codice mazzo:").grid(row=0, column=0)
             ent_Mazzo = tk.Entry(nomeFrame, textvariable=mazzo_var).grid(row=0, column=1)
             btn_calcoloQuery = tk.Button(nomeFrame, text="Controlla", command=lambda : lista_carte_mazzo(ruolo, mazzo_var.get())).grid(row=1, column=0)
@@ -452,7 +470,8 @@ def genera_parametri(azione, ruolo):
             GiornoFineFiera_var=tk.StringVar()
             MeseFineFiera_var=tk.StringVar()
             AnnoFineFiera_var=tk.StringVar()
-
+            
+            db_param_frame_admin.pack()
             lbl_via = tk.Label(db_param_frame_admin, bg='#c7c7c7', text="Inserire via(opzionale):").grid(row=0, column=0)
             ent_via = tk.Entry(db_param_frame_admin, textvariable=via_var).grid(row=0, column=1)
 
@@ -492,7 +511,8 @@ def genera_parametri(azione, ruolo):
             MeseTorneo_var=tk.StringVar()
             AnnoTorneo_var=tk.StringVar()
 
-
+            
+            db_param_frame_admin.pack()
             lbl_torneo = tk.Label(db_param_frame_admin, bg='#c7c7c7', text="Inserire nome del torneo:").grid(row=0, column=0)
             ent_torneo = tk.Entry(db_param_frame_admin, textvariable=torneo_var).grid(row=0, column=1)
 
@@ -528,7 +548,8 @@ def genera_parametri(azione, ruolo):
 
             ruolo=["Giudice", "Addetto sicurezza", "Addetto receptionist", "Negoziante"]
             ruolo_var.set(ruolo)
-
+            
+            db_param_frame_admin.pack()
             lbl_nome = tk.Label(db_param_frame_admin, bg='#c7c7c7', text="Inserire nome del torneo:").grid(row=0, column=0)
             ent_nome = tk.Entry(db_param_frame_admin, textvariable=nome_var).grid(row=0, column=1)
 
@@ -560,7 +581,8 @@ def genera_parametri(azione, ruolo):
             GiornoFine_var=tk.StringVar()
             MeseFine_var=tk.StringVar()
             AnnoFine_var=tk.StringVar()
-
+            
+            db_param_frame_admin.pack()
             lbl_dataInizio = tk.Label(db_param_frame_admin, bg='#c7c7c7', text="Inserire data di inizio del formato GG/MM/YYYY:").grid(row=0, column=0)
             ent_GiornoInizio = tk.Entry(db_param_frame_admin, textvariable=GiornoInizio_var).grid(row=0, column=1)
             ent_MeseInizio = tk.Entry(db_param_frame_admin, textvariable=MeseInizio_var).grid(row=0, column=2)
@@ -593,7 +615,7 @@ def genera_parametri(azione, ruolo):
             GiornoVendita_var=tk.StringVar()
             MeseVendita_var=tk.StringVar()
             AnnoVendita_var=tk.StringVar()
-
+            db_param_frame_admin.pack()
             tipo_var.set(tipologia[0])#valore di partenza
             lbl_tipo = tk.Label(db_param_frame_admin, bg='#c7c7c7', text="Scegliere tipo di prodotto:").grid(row=0, column=0)
             menu_tipo = OptionMenu(db_param_frame_admin, tipo_var, *tipologia).grid(row=0, column=1)#menù a tendina
@@ -623,9 +645,11 @@ def genera_parametri(azione, ruolo):
         ################################ RICERCHE PER ADMIN ##################################################
         
         elif(azione=="A5"):#Gioco da tavolo con più partite non ufficiali
+            db_param_frame_admin.pack_forget()
             gioco_partite_ufficiose()
         
         elif(azione=="A8"):#Guadagno di ogni stand
+            db_param_frame_admin.pack_forget()
             guadagni_stands()
 
 
