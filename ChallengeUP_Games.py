@@ -54,7 +54,7 @@ def calcolo_dimensioni_finestra(frame, alt=0, larg=1):
     elif(frame=="tabella"):
         #dimensione del frame della tabella
         nuova_altezza=(75*screen_height)/100
-        nuova_larghezza=(((50*screen_width)/2)/100)/larg
+        nuova_larghezza=((50*screen_width)/100)/larg
 
     geometria="%dx%d" % (nuova_larghezza, nuova_altezza)
 
@@ -86,14 +86,16 @@ def program_start(tipologia_utente):
         #controllo sulle credenziali
 
 def genera_tabella_query(tipo, records, colonne):
-    total_rows=len(records[0])
+    total_rows=len(records)
+    total_columns=len(records[0])
     print(records)
     print("righe totali = " + str(total_rows))
     i=0
     j=0
     geometria_tabella=calcolo_dimensioni_finestra("tabella", total_rows, colonne)
     dim_tabella=geometria_tabella.split("x")
-    print(dim_tabella[0])
+    print("dimensioni_tabella")
+    print(geometria_tabella)
     clear_frame(db_frame_admin)
     if(tipo=="user"):
         frame=db_frame_user
@@ -113,7 +115,7 @@ def genera_tabella_query(tipo, records, colonne):
     _widgets = []
     print("##################################################### RECORD NELLA CREAZIONE TABELLA #####################################################")
     print(records)
-    print("###############################################################################################################################################################")
+    print("##########################################################################################################################################")
     for row in range(total_rows):
         current_row = []
         for column in range(row):
@@ -305,7 +307,7 @@ def gioco_partite_ufficiose():
 
     index=0
     #colonne=["Nome", "Descrizione", "Regolamento", "Partite totali"]
-    colonne=("q", "w", "e", "r", "t")
+    colonne=("colonna1", "colonna2", "colonna3", "colonna4")
     sql="""SELECT * FROM BATTAGLIE"""
     tabella=[]
     cursor=conn.cursor()
