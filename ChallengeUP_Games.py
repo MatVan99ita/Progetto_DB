@@ -54,7 +54,7 @@ def calcolo_dimensioni_finestra(frame, alt=0, larg=1):
     elif(frame=="tabella"):
         #dimensione del frame della tabella
         nuova_altezza=(75*screen_height)/100
-        nuova_larghezza=((50*screen_width)/100)/larg
+        nuova_larghezza=(((50*screen_width)/2)/100)/(larg*2)
 
     geometria="%dx%d" % (nuova_larghezza, nuova_altezza)
 
@@ -88,7 +88,9 @@ def program_start(tipologia_utente):
 def genera_tabella_query(tipo, records, colonne):
     total_rows=len(records)
     total_columns=len(records[0])
-    print(records)
+    
+    print(str(total_rows)+" x "+str(total_columns))
+
     print("righe totali = " + str(total_rows))
     i=0
     j=0
@@ -118,12 +120,11 @@ def genera_tabella_query(tipo, records, colonne):
     print("##########################################################################################################################################")
     for row in range(total_rows):
         current_row = []
-        for column in range(row):
+        for column in range(total_columns):
             label = tk.Label(text_area, text=str(records[i][j]), borderwidth=0, width=dim_tabella[0])
             j=j+1
             label.grid(row=i, column=j, sticky="nsew", padx=1, pady=1)
             current_row.append(label)
-        print(current_row)
         j=0
         i=i+1
         _widgets.append(current_row)
@@ -317,7 +318,7 @@ def gioco_partite_ufficiose():
         conn.commit()
         records=cursor.fetchall()
         tabella=genera_matrice_query(records, colonne)
-        genera_tabella_query("admin", tabella, len(tabella))
+        genera_tabella_query("admin", tabella, len(colonne))
     except Error as e:
         msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera\n"+str(e))
 
