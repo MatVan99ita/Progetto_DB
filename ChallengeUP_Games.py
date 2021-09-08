@@ -101,26 +101,25 @@ def genera_tabella_query(tipo, records, colonne):
         frame=db_frame_user
     else:
         frame=db_frame_admin
+
     e=tk.Listbox()
     # only the column containing the text is resized when the window size changes:
     frame.columnconfigure(0, weight=1) 
     # resize row 0 height when the window is resized
+    i=i+1
     frame.rowconfigure(0, weight=1)
     for rows in records:
         for data in rows:
             e = Listbox(frame, width=int(dimensione_colonna), height=1)
             e.grid(row=i, column=j)
             e.insert(END, records[i][j])
-            e.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
-            if(i==0):
-                scroll_x.configure(command=e.xview)
-                scroll_y.configure(command=e.yview)
+            e.configure(yscrollcommand=scroll_y.set)
+            e.configure(yscrollcommand=scroll_x.set)
             j=j+1
             index=index+1
         j=0
-        i=i+1
-        
-
+    scroll_y.grid(row=0, column=index, sticky="ns")
+    scroll_x.grid(row=i, column=0, sticky="ns")
     # bind txt to scrollbar
     #admin_scroll_vertical=ttk.Scrollbar(frame, orient=VERTICAL).pack(fill=Y, side=RIGHT, expand=FALSE)
     #admin_scroll_horizontal=ttk.Scrollbar(frame, orient=HORIZONTAL).pack(fill=X, side=BOTTOM, expand=FALSE)
@@ -304,8 +303,8 @@ def gioco_partite_ufficiose():
 
     index=0
     #colonne=["Nome", "Descrizione", "Regolamento", "Partite totali"]
-    colonne=["", "", "", ""]
-    sql="""SELECT * FROM BATTAGLIE"""
+    colonne=["", "", "", "", "", "","", "", "","", "", "","", "", "","", "", "","", "", "","", "", ""]
+    sql="""SELECT * FROM FIERE, TORNEI, PARTITE_UFFICIALI, BATTAGLIE LIMIT 90"""
     tabella=[]
     cursor=conn.cursor()
     tabella.append(colonne)
@@ -713,8 +712,6 @@ lbl_line = tk.Label(top_frame, bg='#c7c7c7', text="*****************************
 lbl_line = tk.Label(top_frame, bg='#c7c7c7', text="**** SESSIONE UTENTE ****", font = "Helvetica 13 bold", foreground="blue").pack()
 lbl_line = tk.Label(top_frame, bg='#c7c7c7', text="***********************************************************").pack()
 
-
-
 #####################################
 top_left_frame = tk.Frame(top_frame, bg='#c7c7c7', highlightbackground="green", highlightcolor="green", highlightthickness=1)
 
@@ -730,8 +727,6 @@ btn_U4=tk.Button(top_left_frame, text="Lista delle carte di un mazzo specificato
 
 top_left_frame.pack(side=tk.LEFT)
 
-scroll_y = Scrollbar(top_frame, orient="vertical").pack(side=tk.LEFT)
-scroll_x = Scrollbar(top_frame, orient="horizontal").pack(side=tk.BOTTOM)
 
 ################### DATABASE FRAME USER ##################
 
@@ -744,6 +739,8 @@ db_frame_user = tk.Frame(top_frame, highlightbackground="green", highlightcolor=
 
 db_frame_user.pack(side=tk.RIGHT)
 
+scroll_y = Scrollbar(db_frame_user, orient="vertical", command=e.yview).grid(row=0, column=2)
+scroll_x = Scrollbar(db_frame_user, orient="horizontal", command=e.yview).grid(row=1, column=1)
 top_frame.pack_forget()
 #####################################
 
@@ -757,7 +754,6 @@ admin_frame = tk.Frame(window_main, bg='#c7c7c7')
 lbl_line = tk.Label(admin_frame, bg='#c7c7c7', text="***********************************************************").pack()
 lbl_line = tk.Label(admin_frame, bg='#c7c7c7', text="**** SESSIONE ADMIN ****", font = "Helvetica 13 bold", foreground="blue").pack()
 lbl_line = tk.Label(admin_frame, bg='#c7c7c7', text="***********************************************************").pack()
-
 
 
 #####################################
