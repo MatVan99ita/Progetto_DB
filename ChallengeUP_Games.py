@@ -127,6 +127,7 @@ def genera_tabella_query(tipo, records, colonne):
     clear_frame(frame)
     #frame.grid(row=1, columnspan=2, padx=2, pady=2, sticky=tk.N+tk.E+tk.S+tk.W)
 
+    # TODO: far funzionare lo scroll
     text_area = tk.Canvas(frame, background="black", width=dim_frame[0], height=dim_tabella[1], scrollregion=(0,0,1200,800))
     hscroll = tk.Scrollbar(frame, orient=tk.HORIZONTAL, command=text_area.xview)
     vscroll = tk.Scrollbar(frame, orient=tk.VERTICAL, command=text_area.yview)
