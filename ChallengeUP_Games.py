@@ -19,6 +19,9 @@ password_entry=tk.StringVar()
 name_entry=tk.StringVar()
 nomeFrame=Frame()
 
+
+######################################## FUNZIONI APPLICAZIONE ####################################################
+
 dataTorneo=tk.StringVar()
 try:
     conn=lite.connect("./ChallengeUPGames_DB.db")
@@ -37,7 +40,9 @@ def Admin_login(log):#da perfezionare ma non indispensabile ai fini del programm
         program_start("user")
 
 def calcolo_dimensioni_finestra(frame, alt=0, larg=1):
-
+    GUI_altezza=(90*screen_height)/100
+    GUI_larghezza=(80*screen_width)/100
+    
     if(frame=="inizio"):
         nuova_altezza=(10*screen_height)/100
         nuova_larghezza=(20*screen_width)/100
@@ -46,16 +51,17 @@ def calcolo_dimensioni_finestra(frame, alt=0, larg=1):
         nuova_altezza=(90*screen_height)/100
         nuova_larghezza=(80*screen_width)/100
 
+#################### Verranno usate le dimensioni della gui principale come metro di misura della tabella ##########################
     elif(frame=="frame tabella"):#frame tabella
-        nuova_altezza=(75*screen_height)/100
-        nuova_larghezza=((50*screen_width)/2)/100
+        nuova_altezza=(60*GUI_altezza)/100
+        nuova_larghezza=((50*GUI_larghezza)/2)/100
 
     #CALCOLO DELLE DIMENSIONI DELLE COLONNE IN BASE AL NUMERO
     elif(frame=="tabella"):
         #dimensione del frame della tabella
-        nuova_altezza=(75*screen_height)/100
+        nuova_altezza=(60*GUI_altezza)/100
         #nuova_larghezza=(((50*screen_width)/2)/100)/(larg*2)
-        nuova_larghezza=(screen_width/larg)/2
+        nuova_larghezza=(GUI_larghezza/larg)/2
 
     geometria="%dx%d" % (nuova_larghezza, nuova_altezza)
 
@@ -85,7 +91,7 @@ def program_start(tipologia_utente):
         #else:
         #    print("errore user e/o password")
         #controllo sulle credenziali
-
+############################## CREAZIONE DELLA TABELLA GRAFICA ####################################
 def genera_tabella_query(tipo, records, colonne):
     total_rows=len(records)
     total_columns=len(records[0])
@@ -93,20 +99,33 @@ def genera_tabella_query(tipo, records, colonne):
     print(str(total_rows)+" x "+str(total_columns))
 
     print("righe totali = " + str(total_rows))
-    i=0
-    j=0
+
+
+    ############# CREAZIONE GEOMETRIE ##################
     geometria_tabella=calcolo_dimensioni_finestra("tabella", total_rows, colonne)
-    
     geometria_frame=calcolo_dimensioni_finestra("frame tabella")
+    geometria_finestra=calcolo_dimensioni_finestra("GUI principale")
+
+    ############# SUDDIVISIONE GEOMETRIE #################
     dim_tabella=geometria_tabella.split("x")
     dim_frame=geometria_frame.split("x")
+    dim_finestra=geometria_finestra.split("x")
+
+    ############# VISTA GEOMETRIE #####################
     print("dimensioni_tabella")
-    print(geometria_tabella)
-    clear_frame(db_frame_admin)
+    print(dim_tabella)
+    print("dimensioni_frame")
+    print(dim_frame)
+    print("dimensioni_finestra")
+    print(dim_finestra)
+
+
     if(tipo=="user"):
         frame=db_frame_user
     else:
         frame=db_frame_admin
+    clear_frame(frame)
+    #frame.grid(row=1, columnspan=2, padx=2, pady=2, sticky=tk.N+tk.E+tk.S+tk.W)
 
     text_area = tk.Canvas(frame, background="black", width=dim_frame[0], height=dim_tabella[1], scrollregion=(0,0,1200,800))
     hscroll = tk.Scrollbar(frame, orient=tk.HORIZONTAL, command=text_area.xview)
@@ -115,25 +134,35 @@ def genera_tabella_query(tipo, records, colonne):
     text_area['yscrollcommand'] = vscroll.set
 
     text_area.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E+tk.W)
-    hscroll.grid(row=1, column=0, sticky=tk.E+tk.W)
-    vscroll.grid(row=0, column=1, sticky=tk.N+tk.S)
-
+    hscroll.grid(row=1, column=0, sticky=tk.N+tk.E+tk.W)
+    vscroll.grid(row=0, column=1, sticky=tk.W+tk.N+tk.S)
+    i=2
+    j=2
     _widgets = []
+
     print("##################################################### RECORD NELLA CREAZIONE TABELLA #####################################################")
-    print(records)
+    for row in range(total_rows):
+        print(records[row])
     print("##########################################################################################################################################")
 
+    larghezza_singolo_elemento=int( (int(dim_tabella[0])/total_columns)/2 )
+    1
+    print("Larghezza elemento: " + str(larghezza_singolo_elemento))
     for row in range(total_rows):
         current_row = []
         for column in range(total_columns):
-            label = tk.Label(text_area, text=str(records[i][j]), borderwidth=0, width=dim_tabella[0])
+            label = tk.Label(text_area, text=str(records[row][column]), borderwidth=0, height=1, width=larghezza_singolo_elemento)
             j=j+1
             label.grid(row=i, column=j, sticky="nsew", padx=1, pady=1)
             current_row.append(label)
-        j=0
+        j=2
         i=i+1
         _widgets.append(current_row)
 
+################################################################################################################################################
+
+
+######################## FORMATTAZZIONE RISULTATO QUERY ##########################
 def genera_matrice_query(records, colonne):
     tabella=[]
     index=0
@@ -144,6 +173,7 @@ def genera_matrice_query(records, colonne):
     print(tabella)
     return tabella
 
+######################## CONVERSIONE DATA DEL DATABASE ########################
 def controlloData(giorno, mese, anno):
     g=len(giorno)
     m=len(mese)
@@ -160,6 +190,12 @@ def controlloData(giorno, mese, anno):
         return 1
     #formattazione della data secondo i database
     return giorno+"/"+mese+"/"+anno
+
+###########################################################################################################
+
+
+
+######################################## FUNZIONI USER ####################################################
 
 def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
     if(controlloData(giorno, mese, anno) != 1):
@@ -806,7 +842,7 @@ db_param_frame_admin.pack(side=tk.BOTTOM)
 #####################################
 db_frame_admin = tk.Frame(admin_frame, highlightbackground="green", highlightcolor="green", highlightthickness=1, width=dimensioni_frame_tabella[0], height=dimensioni_frame_tabella[1])
 
-db_frame_admin.pack(side=tk.RIGHT, fill=BOTH, expand=TRUE)
+db_frame_admin.pack(side=tk.RIGHT, fill=BOTH, expand=FALSE)
 
 admin_frame.pack_forget()
 
