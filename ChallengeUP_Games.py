@@ -1,13 +1,13 @@
 
-import tkinter as tk
+from functools import singledispatch
 from tkinter import *
-from tkinter import Listbox
+import tkinter as tk
+#import tkinter.ttk as ttk
+from tkinter import ttk
 from tkinter import messagebox as msg
 import sqlite3 as lite
 from sqlite3 import Error
-from tkinter import ttk
 import connessione_DB
-
 
 window_main = tk.Tk()
 window_main.title("ChallengeUP Games")
@@ -92,17 +92,25 @@ def program_start(tipologia_utente):
         #    print("errore user e/o password")
         #controllo sulle credenziali
 ############################## CREAZIONE DELLA TABELLA GRAFICA ####################################
+
+
 def genera_tabella_query(tipo, records, colonne):
+    
+    print("#############################################################################")
+    print("####################### Genera tabella query ################################")
+    print("#############################################################################")
+    
     total_rows=len(records)
-    total_columns=len(records[0])
+    total_columns=len(colonne)
     
     print(str(total_rows)+" x "+str(total_columns))
 
     print("righe totali = " + str(total_rows))
 
 
+
     ############# CREAZIONE GEOMETRIE ##################
-    geometria_tabella=calcolo_dimensioni_finestra("tabella", total_rows, colonne)
+    geometria_tabella=calcolo_dimensioni_finestra("tabella", total_rows, total_columns)
     geometria_frame=calcolo_dimensioni_finestra("frame tabella")
     geometria_finestra=calcolo_dimensioni_finestra("GUI principale")
 
@@ -127,52 +135,28 @@ def genera_tabella_query(tipo, records, colonne):
     clear_frame(frame)
     #frame.grid(row=1, columnspan=2, padx=2, pady=2, sticky=tk.N+tk.E+tk.S+tk.W)
 
-    # TODO: far funzionare lo scroll
-    text_area = tk.Canvas(frame, background="black", width=dim_frame[0], height=dim_tabella[1], scrollregion=(0,0,1200,800))
-    hscroll = tk.Scrollbar(frame, orient=tk.HORIZONTAL, command=text_area.xview)
-    vscroll = tk.Scrollbar(frame, orient=tk.VERTICAL, command=text_area.yview)
-    text_area['xscrollcommand'] = hscroll.set
-    text_area['yscrollcommand'] = vscroll.set
+    # TODO: far funzionare lo scroll5
+    tabella=ttk.Treeview(frame, show=['headings'])
+    tabella['columns'] = colonne
+    for elem in range(total_columns):
+        tabella.column(colonne[elem], anchor=CENTER)
+        tabella.heading(colonne[elem], text=colonne[elem], anchor=CENTER)
 
-    text_area.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E+tk.W)
-    hscroll.grid(row=1, column=0, sticky=tk.N+tk.E+tk.W)
-    vscroll.grid(row=0, column=1, sticky=tk.W+tk.N+tk.S)
-    i=2
-    j=2
-    _widgets = []
 
-    print("##################################################### RECORD NELLA CREAZIONE TABELLA #####################################################")
+    hscroll = tk.Scrollbar(frame, orient=tk.HORIZONTAL, command=tabella.xview)
+    vscroll = tk.Scrollbar(frame, orient=tk.VERTICAL, command=tabella.yview)
+    tabella.configure(yscrollcommand=vscroll.set, xscrollcommand=hscroll.set)
+    hscroll.pack(side=TOP, fill="x")
+    tabella.pack(side=RIGHT, fill="both")
+    vscroll.pack(side=LEFT, fill="y")
+
+    print("##################################################### RECORD DELLA TABELLA ###############################################################")
     for row in range(total_rows):
         print(records[row])
+        #for elem in range(row):
+        tabella.insert(parent='', index=row, iid=row, text='', values=records[row])
     print("##########################################################################################################################################")
 
-    larghezza_singolo_elemento=int( (int(dim_tabella[0])/total_columns)/2 )
-    1
-    print("Larghezza elemento: " + str(larghezza_singolo_elemento))
-    for row in range(total_rows):
-        current_row = []
-        for column in range(total_columns):
-            label = tk.Label(text_area, text=str(records[row][column]), borderwidth=0, height=1, width=larghezza_singolo_elemento)
-            j=j+1
-            label.grid(row=i, column=j, sticky="nsew", padx=1, pady=1)
-            current_row.append(label)
-        j=2
-        i=i+1
-        _widgets.append(current_row)
-
-################################################################################################################################################
-
-
-######################## FORMATTAZZIONE RISULTATO QUERY ##########################
-def genera_matrice_query(records, colonne):
-    tabella=[]
-    index=0
-    tabella.append(colonne)
-    for i in records:
-            tabella.append(i)
-            index=index+1
-    print(tabella)
-    return tabella
 
 ######################## CONVERSIONE DATA DEL DATABASE ########################
 def controlloData(giorno, mese, anno):
@@ -218,7 +202,7 @@ def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
         tabella=colonne
         tabella.append(records)
         print(tabella)
-        genera_tabella_query(ruolo, records)
+        genera_tabella_query(ruolo, records, colonne)
 
 def top_giocatori(ruolo, IdGiocatore):
     sql=""" SELECT t.IdTorneo, nome, cognome, SUM(b.punteggio),
@@ -253,8 +237,8 @@ def top_giocatori(ruolo, IdGiocatore):
         cursor.execute(sql)
         conn.commit()
         records=cursor.fetchall()
-        tabella=genera_matrice_query(records, colonne)
-        genera_tabella_query(ruolo, tabella, len(tabella))
+        tabella=genera_tabella_query(ruolo, records, colonne)
+        genera_tabella_query(ruolo, tabella, colonne)
     except Error as e:
         msg.showerror(title="ERRORE CARICAMENTO DATI", message="qualcosa è andato storto con la richiesta dei dati\n"+str(e))
 
@@ -359,7 +343,7 @@ def gioco_partite_ufficiose():
         cursor.execute(sql, ())
         conn.commit()
         records=cursor.fetchall()
-        tabella=genera_matrice_query(records, colonne)
+        tabella=genera_tabella_query("admin", records, colonne)
         genera_tabella_query("admin", tabella, len(colonne))
     except Error as e:
         msg.showerror(title="ERRORE INSERIMENTO", message="qualcosa è andato storto con l'inserimento della fiera\n"+str(e))
