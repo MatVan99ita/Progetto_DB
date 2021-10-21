@@ -496,6 +496,10 @@ def inserimento_Formato(dataInizio, dataFine, codGioco):
 ######################################## SCELTA QUERY #####################################################
 ###########################################################################################################
 
+'''
+    TODO:
+    CORREGGERE LA VISUALIZZAZIONE DEGLI ELEMENTI PER INSERIRE I DATI DI RICERCA
+'''
 def genera_parametri(azione, ruolo):
         nomeFrame=tk.Frame()
         if(ruolo=="user"):
