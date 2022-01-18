@@ -201,8 +201,9 @@ def controlloData(giorno, mese, anno):
         msg.showerror(title="FORMATTAZIONE DATA ERRATA", message="Non esiste un valore numerico")
         return 1
     #formattazione della data secondo i database
-    return giorno+"/"+mese+"/"+anno
-
+    #return giorno+"/"+mese+"/"+anno
+    return anno+"-"+mese+"-"+giorno
+    
 ###########################################################################################################
 
 
