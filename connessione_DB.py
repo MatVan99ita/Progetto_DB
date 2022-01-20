@@ -3,7 +3,7 @@ from sqlite3 import Error
 import os
 import time
 
-db_file="ChallengeUPGames_DB.db"
+db_file="DB/ChallengeUPGames_DB.db"
 msg=""
 
 
@@ -57,7 +57,7 @@ def riempimento(scriptSQL):
 def stampaTutto():
     try:
         # Open and read the file as a single buffer
-        fd = open('selezionaTutto_COMPLETO.sql')
+        fd = open('./selezionaTutto_COMPLETO.sql')
         sqlFile = fd.read()
         fd.close()
     except Error as e:

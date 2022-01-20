@@ -1,4 +1,5 @@
-INSERT INTO BATTAGLIE (numeroMatch,codConcorrente,punteggio,esito) VALUES (1,24,23,"vittoria"),
+INSERT INTO BATTAGLIE (numeroMatch,codConcorrente,punteggio,esito) VALUES 
+(1,24,23,"vittoria"),
 (2,12,24,"vittoria"),
 (3,10,26,"vittoria"),
 (4,17,10,"vittoria"),

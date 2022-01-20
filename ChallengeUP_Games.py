@@ -51,7 +51,7 @@ def program_start(tipologia_utente):
 '''
 dataTorneo=tk.StringVar()
 try:
-    conn=lite.connect("./ChallengeUPGames_DB.db")
+    conn=lite.connect("./DB/ChallengeUPGames_DB.db")
     cur=conn.cursor()
     print(cur)
 except Error as e:
@@ -218,7 +218,7 @@ def lista_partite_effettuate_torneo(conn, giorno, mese, anno, ruolo):
 
         #è richiesta solo la data come parametro
         sql="""SELECT T.IdTorneo, T.nomeTorneo, T.numeroSpettatori, T.numeroPartecipanti, T.codGioco, T.IdFiera, PU.IdMatch, PU.dataPartita, P.nomePadiglione
-            FROM 	TORNEI T, PARTITE_UFFICIALI PU, DIPENDENTI D, PADIGLIONI P, BATTAGLIE B, CONCORRENTI C
+            FROM TORNEI T, PARTITE_UFFICIALI PU, DIPENDENTI D, PADIGLIONI P, BATTAGLIE B, CONCORRENTI C
             WHERE T.IdTorneo = PU.IdTorneo AND
             D.CodiceBadge = PU.IdGiudice AND
             P.CodPadiglione = PU.CodPadiglione AND
